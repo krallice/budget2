@@ -1,0 +1,2 @@
+curl -i localhost:3000/plain_payment_types
+curl --header "Content-Type: application/json" --request POST --data '{"Payment_Type_Id": "1", "Amount": "100"}' -i localhost:3000/plain_add_payment
