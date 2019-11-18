@@ -6,5 +6,5 @@ CREATE TABLE payment_types (
 CREATE TABLE payments (
 	id SERIAL PRIMARY KEY,
 	payment_type_id INTEGER REFERENCES payment_types(id),
-	name NUMERIC(12,2) NOT NULL
+	amount NUMERIC(12,2) NOT NULL
 );
