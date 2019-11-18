@@ -3,6 +3,7 @@ package models
 type Payment struct {
 	Id int
 	Payment_Type_Id int
+	Payment_Date string
 	Amount float32
 }
 
@@ -17,7 +18,7 @@ func AllPayments() ([]*Payment, error) {
 	payments := make([]*Payment, 0)
 	for rows.Next() {
 		payment := new(Payment)
-		err := rows.Scan(&payment.Id, &payment.Payment_Type_Id, &payment.Amount)
+		err := rows.Scan(&payment.Id, &payment.Payment_Type_Id, &payment.Payment_Date, &payment.Amount)
 		if err != nil {
 			return nil, err
 		}
