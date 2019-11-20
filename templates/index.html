@@ -33,6 +33,32 @@ function loadBodyAjax() {
 	};
 	// Fire off the request:
 	reqPaymentTypes.send();
+
+	// Create new request object:
+	var reqPaymentHistory = new XMLHttpRequest();
+	reqPaymentHistory.open("GET", "/ajax/payments");
+
+	// Define event listener:
+	reqPaymentHistory.onreadystatechange = function() {
+
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
+
+			// Parse the returned data and find our select object:
+			var data = JSON.parse(this.responseText);
+			var ulPaymentHistory = document.getElementById("ulPaymentHistory")
+
+			// Foreach element returned in the JSON,
+			// dynamically create our option object:
+			data.forEach( function(obj) {
+				var li = document.createElement("li");
+				li.innerHTML = JSON.stringify(obj, null, 2);
+				ulPaymentHistory.appendChild(li);
+			});
+		}
+	};
+	// Fire off the request:
+	reqPaymentHistory.send();
 }
 
 </script>
@@ -46,5 +72,10 @@ function loadBodyAjax() {
 	  </select>
 	  <button name="buttonSubmitPayment">Pay</button>
 	</div>
+	<h4>payment history</h4>
+    <div name="divPaymentHistory">
+      <ul id="ulPaymentHistory">
+      </ul>
+    </div>
 </body>
 </html>
