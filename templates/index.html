@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <title>Budget2</title>
 <script>
-// Function loaded when body is ready:
-function loadBodyAjax() {
+function getPaymentTypes() {
 
 	// Create new request object:
 	var reqPaymentTypes = new XMLHttpRequest();
@@ -33,6 +32,9 @@ function loadBodyAjax() {
 	};
 	// Fire off the request:
 	reqPaymentTypes.send();
+}
+
+function getPaymentHistory() {
 
 	// Create new request object:
 	var reqPaymentHistory = new XMLHttpRequest();
@@ -61,6 +63,19 @@ function loadBodyAjax() {
 	reqPaymentHistory.send();
 }
 
+// Function loaded when body is ready:
+function loadBodyAjax() {
+	getPaymentTypes();
+	getPaymentHistory();
+}
+
+function submitPayment() {
+
+
+
+
+}
+
 </script>
 </head>
 <body onload="loadBodyAjax()">
@@ -70,7 +85,7 @@ function loadBodyAjax() {
 	  <input type="text" name="inputPayment">
 	  <select id="selectPaymentTypes">
 	  </select>
-	  <button name="buttonSubmitPayment">Pay</button>
+	  <button name="buttonSubmitPayment" onclick="submitPayment()">Pay</button>
 	</div>
 	<h4>payment history</h4>
     <div name="divPaymentHistory">
