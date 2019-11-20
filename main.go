@@ -15,9 +15,11 @@ func main() {
 	// Main Index:
 	http.HandleFunc("/", getIndex)
 
+	// AJAX Functions:
 	http.HandleFunc("/ajax/payment_types", ajaxPaymentTypes)
 
 	// Plain function handlers:
+	// (To be removed in a later release):
 	http.HandleFunc("/plain_payment_types", getPaymentTypesPlain)
 	http.HandleFunc("/plain_payments", getPaymentsPlain)
 	http.HandleFunc("/plain_add_payment", addPaymentPlain)

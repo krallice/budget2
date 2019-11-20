@@ -1,11 +1,50 @@
 <!DOCTYPE html>
- <html>
-	 <body>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Budget2</title>
+<script>
+// Function loaded when body is ready:
+function loadBodyAjax() {
 
-		 <h1>My First Heading</h1>
-		 <p>My first paragraph.</p>
+	// Create new request object:
+	var reqPaymentTypes = new XMLHttpRequest();
+	reqPaymentTypes.open("GET", "/ajax/payment_types");
 
-	 </body>
- </html>
+	// Define event listener:
+	reqPaymentTypes.onreadystatechange = function() {
 
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
 
+			// Parse the returned data and find our select object:
+			var data = JSON.parse(this.responseText);
+			var selectPaymentTypes = document.getElementById("selectPaymentTypes")
+
+			// Foreach element returned in the JSON,
+			// dynamically create our option object:
+			data.forEach( function(obj) {
+				var option = document.createElement("option");
+				option.value = obj.id;
+				option.text = obj.name;
+				selectPaymentTypes.add(option);
+			});
+		}
+	};
+	// Fire off the request:
+	reqPaymentTypes.send();
+}
+
+</script>
+</head>
+<body onload="loadBodyAjax()">
+	<h2>budget2</h2>
+	<div name="divPayment">
+	  <b>$</b>
+	  <input type="text" name="inputPayment">
+	  <select id="selectPaymentTypes">
+	  </select>
+	  <button name="buttonSubmitPayment">Pay</button>
+	</div>
+</body>
+</html>
