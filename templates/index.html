@@ -50,6 +50,11 @@ function getPaymentHistory() {
 			var data = JSON.parse(this.responseText);
 			var ulPaymentHistory = document.getElementById("ulPaymentHistory")
 
+			// Clean our Li before re-adding children:
+			while (ulPaymentHistory.firstChild) {
+				ulPaymentHistory.removeChild(ulPaymentHistory.firstChild);
+			}
+
 			// Foreach element returned in the JSON,
 			// dynamically create our option object:
 			data.forEach( function(obj) {
@@ -63,29 +68,53 @@ function getPaymentHistory() {
 	reqPaymentHistory.send();
 }
 
+// Submit payment to server
+function submitPayment() {
+
+	var selectPaymentTypes = document.getElementById("selectPaymentTypes");
+	var paymentType = selectPaymentTypes.options[selectPaymentTypes.selectedIndex];
+	var payment_type_id = parseInt(paymentType.value);
+
+	var amount = parseFloat(document.getElementById("inputPayment").value);
+	if (amount == 0) {
+		alert("Please entire an amount to pay");
+		return;
+	}
+	var paymentJSON = {
+		"payment_type_id": 	payment_type_id,
+		"amount":			amount
+	}
+
+	// Create new request object:
+	var reqAddPayment = new XMLHttpRequest();
+	reqAddPayment.open("POST", "/ajax/payments");
+	reqAddPayment.setRequestHeader("Content-type", "application/json");
+	reqAddPayment.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			// Refresh current display:
+			getPaymentHistory();
+		}
+	};
+
+	// Fire off the request:
+	reqAddPayment.send(JSON.stringify(paymentJSON));
+}
+
 // Function loaded when body is ready:
 function loadBodyAjax() {
 	getPaymentTypes();
 	getPaymentHistory();
 }
-
-function submitPayment() {
-
-
-
-
-}
-
 </script>
 </head>
 <body onload="loadBodyAjax()">
 	<h2>budget2</h2>
 	<div name="divPayment">
 	  <b>$</b>
-	  <input type="text" name="inputPayment">
+	  <input type="text" id="inputPayment">
 	  <select id="selectPaymentTypes">
 	  </select>
-	  <button name="buttonSubmitPayment" onclick="submitPayment()">Pay</button>
+	  <button id="buttonSubmitPayment" onclick="submitPayment()">Pay</button>
 	</div>
 	<h4>payment history</h4>
     <div name="divPaymentHistory">
