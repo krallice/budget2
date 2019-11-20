@@ -60,8 +60,7 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 // Returns all Payments as JSON
 func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 
-	// Supported HTTP Methods: GET
-	// Future: POST
+	// Supported HTTP Methods: GET, POST
 	switch r.Method {
 	case "GET":
 		pys, err := models.AllPayments()
@@ -84,10 +83,14 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// Todo: Insert Data into p
-		// Debug:
+		// Diag printing:
 		fmt.Println(p.Amount)
-		fmt.Println(p.Payment_Date)
+		fmt.Println(p.GetPaymentDateString())
+		// Insert POST'd Payment into DB:
+		err = models.InsertPayment(&p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	default:
 		http.Error(w, http.StatusText(405), 405)
 		return
