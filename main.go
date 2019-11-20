@@ -27,7 +27,6 @@ func main() {
 
 	http.ListenAndServe(":3000", nil)
 }
-
 // Basic Placeholder Index Page:
 func getIndex(w http.ResponseWriter, r *http.Request) {
 
@@ -38,7 +37,6 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./templates/index.html"))
 	tmpl.Execute(w, nil)
 }
-
 // Returns all Payment_Types in DB as a JSON object:
 func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 
@@ -59,28 +57,42 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jreply)
 }
-
 // Returns all Payments as JSON
 func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method != "GET" {
+	// Supported HTTP Methods: GET
+	// Future: POST
+	switch r.Method {
+	case "GET":
+		pys, err := models.AllPayments()
+		if err != nil {
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+		jreply, err := json.Marshal(pys)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jreply)
+	case "POST":
+		dec := json.NewDecoder(r.Body)
+		var p models.Payment
+		err := dec.Decode(&p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// Todo: Insert Data into p
+		// Debug:
+		fmt.Println(p.Amount)
+		fmt.Println(p.Payment_Date)
+	default:
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	pys, err := models.AllPayments()
-	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	jreply, err := json.Marshal(pys)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jreply)
 }
-
 // Todo: Implement actual persist-to-db functionality:
 func addPaymentPlain(w http.ResponseWriter, r *http.Request) {
 
