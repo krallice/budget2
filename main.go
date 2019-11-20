@@ -17,6 +17,7 @@ func main() {
 
 	// AJAX Functions:
 	http.HandleFunc("/ajax/payment_types", ajaxPaymentTypes)
+	http.HandleFunc("/ajax/payments", ajaxPayments)
 
 	// Plain function handlers:
 	// (To be removed in a later release):
@@ -51,6 +52,27 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jreply, err := json.Marshal(pts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jreply)
+}
+
+// Returns all Payments as JSON
+func ajaxPayments(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+	pys, err := models.AllPayments()
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	jreply, err := json.Marshal(pys)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

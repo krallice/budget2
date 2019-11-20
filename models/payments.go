@@ -1,10 +1,10 @@
 package models
 
 type Payment struct {
-	Id int
-	Payment_Type_Id int
-	Payment_Date string
-	Amount float32
+	Id int					`json:"id"`
+	Payment_Type_Id int		`json:"payment_type_id"`
+	Payment_Date string		`json:"payment_date"`
+	Amount float32			`json:"amount"`
 }
 
 func AllPayments() ([]*Payment, error) {
