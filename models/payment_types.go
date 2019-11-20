@@ -1,8 +1,8 @@
 package models
 
 type Payment_Type struct {
-	Id int
-	Name string
+	Id int			`json:"id"`
+	Name string		`json:"name"`
 }
 
 func AllPaymentTypes() ([]*Payment_Type, error) {
