@@ -25,7 +25,10 @@ func (p *Payment) addPaymentDate() {
 // Return all Payments from DB:
 func AllPayments() ([]*Payment, error) {
 
-	rows, err := db.Query("SELECT * FROM payments")
+	sql := `
+	SELECT * FROM payments
+	`
+	rows, err := db.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +52,7 @@ func AllPayments() ([]*Payment, error) {
 // It's also this function's responsibility to add the date:
 func InsertPayment(p *Payment) (error) {
 
+	// Generate our payment date based upon server time:
 	p.addPaymentDate()
 	sql := `
 	INSERT INTO payments (Payment_Type_Id, Payment_Date, Amount)
@@ -60,10 +64,12 @@ func InsertPayment(p *Payment) (error) {
 	if err != nil {
 		return err
 	}
+	// Debug:
 	fmt.Println("New Record is:", id)
 	return nil
 }
 
+// Aggregate the payment amounts based upon our pay boundary:
 func MonthlySummary() ([]*Payment, error) {
 
 	sql := `
@@ -100,19 +106,3 @@ func MonthlySummary() ([]*Payment, error) {
 	}
 	return summaries, nil
 }
-
-/* SQL Date Aggregation Query:
-SELECT 
-    payment_type_id,
-    CASE 
-        WHEN date_part('day', payment_date) < 15 THEN 
-            date_trunc('month', payment_date) + interval '-1month 14 days'
-        ELSE  date_trunc('month', payment_date) + interval '14 days'
-    END AS payment_date,
-    SUM(amount) AS amount
-FROM
-    payments	
-GROUP BY 1,2
-ORDER BY payment_date DESC;
-*/
-
