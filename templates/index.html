@@ -68,6 +68,40 @@ function getPaymentHistory() {
 	reqPaymentHistory.send();
 }
 
+function getMonthlySums() {
+
+	// Create new request object:
+	var reqMonthlySums = new XMLHttpRequest();
+	reqMonthlySums.open("GET", "/ajax/monthlysummary");
+
+	// Define event listener:
+	reqMonthlySums.onreadystatechange = function() {
+
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
+
+			// Parse the returned data and find our select object:
+			var data = JSON.parse(this.responseText);
+			var ulMonthlySummary = document.getElementById("ulMonthlySummary")
+
+			// Clean our Li before re-adding children:
+			while (ulMonthlySummary.firstChild) {
+				ulMonthlySummary.removeChild(ulMonthlySummary.firstChild);
+			}
+
+			// Foreach element returned in the JSON,
+			// dynamically create our option object:
+			data.forEach( function(obj) {
+				var li = document.createElement("li");
+				li.innerHTML = JSON.stringify(obj, null, 2);
+				ulMonthlySummary.appendChild(li);
+			});
+		}
+	};
+	// Fire off the request:
+	reqMonthlySums.send();
+}
+
 // Submit payment to server
 function submitPayment() {
 
@@ -93,6 +127,7 @@ function submitPayment() {
 		if (this.readyState == 4 && this.status == 200) {
 			// Refresh current display:
 			getPaymentHistory();
+			getMonthlySums();
 		}
 	};
 
@@ -104,6 +139,7 @@ function submitPayment() {
 function loadBodyAjax() {
 	getPaymentTypes();
 	getPaymentHistory();
+	getMonthlySums();
 }
 </script>
 </head>
@@ -119,6 +155,11 @@ function loadBodyAjax() {
 	<h4>payment history</h4>
     <div name="divPaymentHistory">
       <ul id="ulPaymentHistory">
+      </ul>
+    </div>
+	<h4>monthly sums</h4>
+    <div name="divMonthlySummary">
+      <ul id="ulMonthlySummary">
       </ul>
     </div>
 </body>

@@ -18,6 +18,7 @@ func main() {
 	// AJAX Functions:
 	http.HandleFunc("/ajax/payment_types", ajaxPaymentTypes)
 	http.HandleFunc("/ajax/payments", ajaxPayments)
+	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)
 
 	// Plain function handlers:
 	// (To be removed in a later release):
@@ -57,6 +58,26 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jreply)
 }
+
+func ajaxMonthlySummary(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+	sums, err := models.MonthlySummary()
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	jreply, err := json.Marshal(sums)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jreply)
+}
 // Either Get or Set our Payment(s):
 func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 
@@ -84,9 +105,6 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		// Diag printing:
-		// fmt.Println(p.Amount)
-		// Insert POST'd Payment into DB:
 		err = models.InsertPayment(&p)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -64,6 +64,43 @@ func InsertPayment(p *Payment) (error) {
 	return nil
 }
 
+func MonthlySummary() ([]*Payment, error) {
+
+	sql := `
+	SELECT 
+    	payment_type_id,
+    	CASE 
+        WHEN date_part('day', payment_date) < 15 THEN 
+             date_trunc('month', payment_date) + interval '-1month 14 days'
+        ELSE date_trunc('month', payment_date) + interval '14 days'
+    	END AS payment_date,
+    	SUM(amount) AS amount
+	FROM
+    	payments	
+	GROUP BY 1,2
+	ORDER BY payment_date DESC;
+	`
+	rows, err := db.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	summaries := make([]*Payment, 0)
+	for rows.Next() {
+		summary := new(Payment)
+		err := rows.Scan(&summary.Payment_Type_Id, &summary.Payment_Date, &summary.Amount)
+		if err != nil {
+			return nil, err
+		}
+		summaries = append(summaries, summary)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return summaries, nil
+}
+
 /* SQL Date Aggregation Query:
 SELECT 
     payment_type_id,
@@ -77,7 +114,5 @@ FROM
     payments	
 GROUP BY 1,2
 ORDER BY payment_date DESC;
-
-func getMonthlySums() (..., error)
 */
 
