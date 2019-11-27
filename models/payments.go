@@ -63,3 +63,21 @@ func InsertPayment(p *Payment) (error) {
 	fmt.Println("New Record is:", id)
 	return nil
 }
+
+/* SQL Date Aggregation Query:
+SELECT 
+    payment_type_id,
+    CASE 
+        WHEN date_part('day', payment_date) < 15 THEN 
+            date_trunc('month', payment_date) + interval '-1month 14 days'
+        ELSE  date_trunc('month', payment_date) + interval '14 days'
+    END AS payment_date,
+    SUM(amount) AS amount
+FROM
+    payments	
+GROUP BY 1,2
+ORDER BY payment_date DESC;
+
+func getMonthlySums() (..., error)
+*/
+
