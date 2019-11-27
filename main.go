@@ -20,12 +20,6 @@ func main() {
 	http.HandleFunc("/ajax/payments", ajaxPayments)
 	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)
 
-	// Plain function handlers:
-	// (To be removed in a later release):
-	http.HandleFunc("/plain_payment_types", getPaymentTypesPlain)
-	http.HandleFunc("/plain_payments", getPaymentsPlain)
-	http.HandleFunc("/plain_add_payment", addPaymentPlain)
-
 	http.ListenAndServe(":3000", nil)
 }
 // Basic Placeholder Index Page:
@@ -59,6 +53,7 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 	w.Write(jreply)
 }
 
+// Returns a list of aggregated monthly summaries of Payments
 func ajaxMonthlySummary(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
@@ -81,8 +76,8 @@ func ajaxMonthlySummary(w http.ResponseWriter, r *http.Request) {
 // Either Get or Set our Payment(s):
 func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 
-	// Supported HTTP Methods: GET, POST
 	switch r.Method {
+	// Return all Payments:
 	case "GET":
 		pys, err := models.AllPayments()
 		if err != nil {
@@ -96,6 +91,7 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jreply)
+	// Insert a new Payment:
 	case "POST":
 		var p models.Payment
 
@@ -112,63 +108,5 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed);
 		return
-	}
-}
-// Todo: Implement actual persist-to-db functionality:
-func addPaymentPlain(w http.ResponseWriter, r *http.Request) {
-
-	var p models.Payment
-
-	// Only allow POSTs:
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-	if r.Body == nil {
-		http.Error(w, "Please send a request body", 400)
-		return
-	}
-	err := json.NewDecoder(r.Body).Decode(&p)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-	fmt.Fprintf(w, "%.2f\n", p.Amount)
-}
-
-// Undecorated/plain diagnostic functions below:
-// (To be removed at a later stage)
-
-// Diagnostic testing/building function to display table contents:
-func getPaymentTypesPlain(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-	payment_types, err := models.AllPaymentTypes()
-	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	for _, payment_type := range payment_types {
-		fmt.Fprintf(w, "%d, %s\n", payment_type.Id, payment_type.Name)
-	}
-}
-
-// Get a plain dump of all payments:
-func getPaymentsPlain(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-	payments, err := models.AllPayments()
-	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	for _, payment := range payments {
-		fmt.Fprintf(w, "%d, %d, %s, %.2f,\n", payment.Id, payment.Payment_Type_Id, payment.Payment_Date, payment.Amount)
 	}
 }
