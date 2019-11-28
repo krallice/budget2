@@ -5,6 +5,7 @@ type PaymentType struct {
 	Name string		`json:"name"`
 }
 
+// Returns a slice of all PaymentTypes in DB:
 func AllPaymentTypes() ([]*PaymentType, error) {
 
 	sql := `

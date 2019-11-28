@@ -1,6 +1,7 @@
 package models
 
 import (
+	"budget2/config"
 	"time"
 	"fmt"
 )
@@ -76,9 +77,9 @@ func MonthlySummary() ([]*Payment, error) {
 	SELECT 
     	payment_type_id,
     	CASE 
-        WHEN date_part('day', payment_date) < 15 THEN 
-             date_trunc('month', payment_date) + interval '-1month 14 days'
-        ELSE date_trunc('month', payment_date) + interval '14 days'
+        WHEN date_part('day', payment_date) < %d THEN 
+             date_trunc('month', payment_date) + interval '-1month %d days'
+        ELSE date_trunc('month', payment_date) + interval '%d days'
     	END AS payment_date,
     	SUM(amount) AS amount
 	FROM
@@ -86,6 +87,11 @@ func MonthlySummary() ([]*Payment, error) {
 	GROUP BY 1,2
 	ORDER BY payment_date DESC;
 	`
+	// Substitute the %d values in sql with the Payday values from our master config structure
+	// Subtract one from the value as months start on day 1, not day 0:
+	paydayoffset := config.Budget2Config.Payday - 1
+	sql = fmt.Sprintf(sql, config.Budget2Config.Payday, paydayoffset, paydayoffset)
+
 	rows, err := db.Query(sql)
 	if err != nil {
 		return nil, err
