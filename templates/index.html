@@ -68,6 +68,40 @@ function getPaymentHistory() {
 	reqPaymentHistory.send();
 }
 
+function getPaymentSums() {
+
+	// Create new request object:
+	var reqPaymentSums = new XMLHttpRequest();
+	reqPaymentSums.open("GET", "/ajax/paymentsummary");
+
+	// Define event listener:
+	reqPaymentSums.onreadystatechange = function() {
+
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
+
+			// Parse the returned data and find our select object:
+			var data = JSON.parse(this.responseText);
+			var ulPaymentSummary = document.getElementById("ulPaymentSummary")
+
+			// Clean our Li before re-adding children:
+			while (ulPaymentSummary.firstChild) {
+				ulPaymentSummary.removeChild(ulPaymentSummary.firstChild);
+			}
+
+			// Foreach element returned in the JSON,
+			// dynamically create our option object:
+			data.forEach( function(obj) {
+				var li = document.createElement("li");
+				li.innerHTML = JSON.stringify(obj, null, 2);
+				ulPaymentSummary.appendChild(li);
+			});
+		}
+	};
+	// Fire off the request:
+	reqPaymentSums.send();
+}
+
 function getMonthlySums() {
 
 	// Create new request object:
@@ -138,6 +172,7 @@ function submitPayment() {
 // Function loaded when body is ready:
 function loadBodyAjax() {
 	getPaymentTypes();
+	getPaymentSums();
 	getPaymentHistory();
 	getMonthlySums();
 }
@@ -151,6 +186,11 @@ function loadBodyAjax() {
 	  <select id="selectPaymentTypes">
 	  </select>
 	  <button id="buttonSubmitPayment" onclick="submitPayment()">Pay</button>
+	</div>
+	<h4>payment summary</h4>
+	<div name="divPaymentSummary">
+		<ul id="ulPaymentSummary">
+		</ul>
 	</div>
 	<h4>payment history</h4>
     <div name="divPaymentHistory">

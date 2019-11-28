@@ -41,6 +41,7 @@ func main() {
 	// AJAX Functions:
 	http.HandleFunc("/ajax/payment_types", ajaxPaymentTypes)
 	http.HandleFunc("/ajax/payments", ajaxPayments)
+	http.HandleFunc("/ajax/paymentsummary", ajaxPaymentSummary)
 	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)
 
 	log.Print("Webserver UP")
@@ -84,8 +85,29 @@ func ajaxMonthlySummary(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	sums, err := models.MonthlySummary()
+	sums, err := models.GetMonthlySummary()
 	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	jreply, err := json.Marshal(sums)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jreply)
+}
+// Returns a total summed amount of payments:
+func ajaxPaymentSummary(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+	sums, err := models.GetPaymentSummary()
+	if err != nil {
+		fmt.Println(err)
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
