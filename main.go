@@ -2,6 +2,7 @@ package main
 
 import (
 	"budget2/models"
+	"budget2/config"
 	"fmt"
 	"net/http"
 	"encoding/json"
@@ -10,6 +11,12 @@ import (
 
 func main() {
 
+	// Attempt to read our YAML config file, and bomb out if this fails:
+	err := config.ReadConfig()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	models.InitDB("postgres://postgres:password1@localhost/budget2")
 
 	// Main Index:
