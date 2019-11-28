@@ -1,8 +1,8 @@
 package models
 
 type PaymentType struct {
-	Id int			`json:"id"`
-	Name string		`json:"name"`
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // Returns a slice of all PaymentTypes in DB:

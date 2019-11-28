@@ -2,20 +2,20 @@ package models
 
 import (
 	"budget2/config"
-	"time"
 	"fmt"
+	"time"
 )
 
 type Payment struct {
-	Id int						`json:"id"`
-	Payment_Type_Id int			`json:"payment_type_id"`
-	Payment_Date time.Time		`json:"payment_date"`
-	Amount float32				`json:"amount"`
+	Id              int       `json:"id"`
+	Payment_Type_Id int       `json:"payment_type_id"`
+	Payment_Date    time.Time `json:"payment_date"`
+	Amount          float32   `json:"amount"`
 }
 
 type PaymentSummary struct {
-	Payment_Type_Id int			`json:"payment_type_id"`
-	Amount float32				`json:"amount"`
+	Payment_Type_Id int     `json:"payment_type_id"`
+	Amount          float32 `json:"amount"`
 }
 
 // Horrible golang date formatting string for YYYY-MM-DD:
@@ -28,6 +28,7 @@ func (p *Payment) GetPaymentDateString() string {
 func (p *Payment) addPaymentDate() {
 	p.Payment_Date = time.Now()
 }
+
 // Return all Payments from DB:
 func AllPayments() ([]*Payment, error) {
 
@@ -54,9 +55,10 @@ func AllPayments() ([]*Payment, error) {
 	}
 	return payments, nil
 }
+
 // Insert pointer to payment into the DB
 // It's also this function's responsibility to add the date:
-func InsertPayment(p *Payment) (error) {
+func InsertPayment(p *Payment) error {
 
 	// Generate our payment date based upon server time:
 	p.addPaymentDate()

@@ -1,14 +1,14 @@
 package main
 
 import (
-	"budget2/models"
 	"budget2/config"
+	"budget2/models"
 	"fmt"
 	"log"
 	// "log/syslog"
-	"net/http"
 	"encoding/json"
 	"html/template"
+	"net/http"
 )
 
 func main() {
@@ -47,6 +47,7 @@ func main() {
 	log.Print("Webserver UP")
 	http.ListenAndServe(":3000", nil)
 }
+
 // Basic Placeholder Index Page:
 func getIndex(w http.ResponseWriter, r *http.Request) {
 
@@ -57,6 +58,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./templates/index.html"))
 	tmpl.Execute(w, nil)
 }
+
 // Returns all PaymentTypes in DB as a JSON object:
 func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 
@@ -98,6 +100,7 @@ func ajaxMonthlySummary(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jreply)
 }
+
 // Returns a total summed amount of payments:
 func ajaxPaymentSummary(w http.ResponseWriter, r *http.Request) {
 
@@ -119,6 +122,7 @@ func ajaxPaymentSummary(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jreply)
 }
+
 // Either Get or Set our Payment(s):
 func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 
@@ -152,7 +156,7 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	default:
-		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed);
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
 		return
 	}
 }
