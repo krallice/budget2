@@ -18,6 +18,12 @@ type PaymentSummary struct {
 	Amount          float32 `json:"amount"`
 }
 
+type MonthlySummary struct {
+	Payment_Type_Id int     `json:"payment_type_id"`
+	Payment_Date    time.Time `json:"payment_date"`
+	Amount          float32 `json:"amount"`
+}
+
 // Horrible golang date formatting string for YYYY-MM-DD:
 const dateFormat string = "2006-01-02"
 
@@ -78,7 +84,7 @@ func InsertPayment(p *Payment) error {
 }
 
 // Aggregate the payment amounts based upon our pay boundary:
-func GetMonthlySummary() ([]*Payment, error) {
+func GetMonthlySummary() ([]*MonthlySummary, error) {
 
 	sql := `
 	SELECT 
@@ -105,9 +111,9 @@ func GetMonthlySummary() ([]*Payment, error) {
 	}
 	defer rows.Close()
 
-	summaries := make([]*Payment, 0)
+	summaries := make([]*MonthlySummary, 0)
 	for rows.Next() {
-		summary := new(Payment)
+		summary := new(MonthlySummary)
 		err := rows.Scan(&summary.Payment_Type_Id, &summary.Payment_Date, &summary.Amount)
 		if err != nil {
 			return nil, err
