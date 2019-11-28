@@ -39,7 +39,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./templates/index.html"))
 	tmpl.Execute(w, nil)
 }
-// Returns all Payment_Types in DB as a JSON object:
+// Returns all PaymentTypes in DB as a JSON object:
 func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
