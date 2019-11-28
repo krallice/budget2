@@ -4,6 +4,8 @@ import (
 	"budget2/models"
 	"budget2/config"
 	"fmt"
+	"log"
+	// "log/syslog"
 	"net/http"
 	"encoding/json"
 	"html/template"
@@ -11,12 +13,26 @@ import (
 
 func main() {
 
+	/* Disable write to syslog
+	logwriter, err := syslog.New(syslog.LOG_NOTICE, "budget2")
+	if err != nil {
+		log.Print("Unable to start syslog, exiting ...")
+		return
+	}
+	log.SetOutput(logwriter)
+	*/
+
+	log.Print("Budget2 Daemon Starting ...")
+
 	// Attempt to read our YAML config file, and bomb out if this fails:
+	log.Print("Reading YAML config file")
 	err := config.ReadConfig()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	log.Print("Connecting to postgres DB")
 	models.InitDB("postgres://postgres:password1@localhost/budget2")
 
 	// Main Index:
@@ -27,6 +43,7 @@ func main() {
 	http.HandleFunc("/ajax/payments", ajaxPayments)
 	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)
 
+	log.Print("Webserver UP")
 	http.ListenAndServe(":3000", nil)
 }
 // Basic Placeholder Index Page:
