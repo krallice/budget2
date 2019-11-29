@@ -7,6 +7,7 @@ import (
 
 type Budget2ConfigStruct struct {
 	Payday int `yaml:"payday"`
+	InitialValues map[int]float32 `yaml:"initial-values"`
 }
 
 var Budget2Config Budget2ConfigStruct

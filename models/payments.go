@@ -145,6 +145,11 @@ func GetPaymentSummary() ([]*PaymentSummary, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		// Add our adjustment from the InitalValues Config map, IF the key exists:
+		if val, ok := config.Budget2Config.InitialValues[summary.Payment_Type_Id]; ok {
+			summary.Amount = summary.Amount + val
+		}
 		summaries = append(summaries, summary)
 	}
 	if err = rows.Err(); err != nil {
