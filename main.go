@@ -40,6 +40,7 @@ func main() {
 
 	// AJAX Functions:
 	http.HandleFunc("/ajax/budgetsummary", ajaxBudgetSummary)
+	http.HandleFunc("/ajax/paymenttypes", ajaxPaymentTypes)
 
 	http.HandleFunc("/ajax/payments", ajaxPayments)
 	http.HandleFunc("/ajax/paymentsummary", ajaxPaymentSummary)
@@ -60,7 +61,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-// Returns all PaymentTypes in DB as a JSON object:
+// Returns our master BudgetSummary Struct as JSON:
 func ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
