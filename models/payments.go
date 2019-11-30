@@ -31,8 +31,10 @@ type MonthlySummary struct {
 // This provides the high level details for overview
 type BudgetSummary struct {
 	RentPaid		bool					`json:"rentpaid"`
+	// Limit = RentAmount + TotalLocked
 	Limit			float32					`json:"limit"`
 	TotalLocked		float32					`json:"totallocked"`
+	LockedThisMonth float32					`json:"lockedthismonth"`
 	Totals			[]*PaymentSummary		`json:"totals"`
 }
 
@@ -143,6 +145,8 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 
 	var b BudgetSummary
 
+	currentday := time.Now()
+
 	// Get Base Summary:
 	sql := `
 	SELECT SUM(amount) AS amount FROM payments
@@ -153,8 +157,41 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 		return nil, err
 	}
 
+	// Locked this month:
+	sql = `
+	SELECT amount FROM 
+		(SELECT 
+			payment_type_id,
+			CASE 
+				WHEN date_part('day', payment_date) < %d THEN 
+					date_trunc('month', payment_date) + interval '-1month %d days'
+				ELSE date_trunc('month', payment_date) + interval '%d days'
+			END AS payment_date,
+			SUM(amount) AS amount
+		FROM
+			payments
+		WHERE
+			payment_type_id = 1
+		GROUP BY 1,2) AS agg_values
+	WHERE
+		CASE 
+			WHEN date_part('day', CURRENT_DATE) < %d THEN 
+				payment_date = date_trunc('month', CURRENT_DATE) + interval '-1month %d days'
+			ELSE 
+				payment_date = date_trunc('month', CURRENT_DATE) + interval '%d days'
+		END
+	`
+	// Substitute the %d values in sql with the Payday values from our master config structure
+	// Subtract one from the value as months start on day 1, not day 0:
+	paydayoffset := config.Budget2Config.Payday - 1
+	sql = fmt.Sprintf(sql, config.Budget2Config.Payday, paydayoffset, paydayoffset, config.Budget2Config.Payday, paydayoffset, paydayoffset)
+	row = db.QueryRow(sql)
+	err = row.Scan(&b.LockedThisMonth)
+	if err != nil {
+		return nil, err
+	}
+
 	// Adjust for rent:
-	currentday := time.Now()
 	cd, err := strconv.Atoi(currentday.Format(dayFormat))
 	if err != nil {
 		return nil, err
