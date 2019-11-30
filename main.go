@@ -41,7 +41,6 @@ func main() {
 	// AJAX Functions:
 	http.HandleFunc("/ajax/budgetsummary", ajaxBudgetSummary)
 
-	http.HandleFunc("/ajax/payment_types", ajaxPaymentTypes)
 	http.HandleFunc("/ajax/payments", ajaxPayments)
 	http.HandleFunc("/ajax/paymentsummary", ajaxPaymentSummary)
 	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)

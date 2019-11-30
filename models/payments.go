@@ -10,20 +10,20 @@ import (
 // An individual payment:
 type Payment struct {
 	Id              int       `json:"id"`
-	Payment_Type_Id int       `json:"payment_type_id"`
-	Payment_Date    time.Time `json:"payment_date"`
+	PaymentTypeId	int       `json:"payment_type_id"`
+	PaymentDate		time.Time `json:"payment_date"`
 	Amount          float32   `json:"amount"`
 }
 
 // Total amount paid per PaymentType bucket:
 type PaymentSummary struct {
-	Payment_Type_Id int     `json:"payment_type_id"`
+	PaymentTypeId	int     `json:"payment_type_id"`
 	Amount          float32 `json:"amount"`
 }
 
 type MonthlySummary struct {
-	Payment_Type_Id int     `json:"payment_type_id"`
-	Payment_Date    time.Time `json:"payment_date"`
+	PaymentTypeId	int     `json:"payment_type_id"`
+	PaymentDate		time.Time `json:"payment_date"`
 	Amount          float32 `json:"amount"`
 }
 
@@ -42,10 +42,10 @@ const dayFormat string = "02"
 
 // Getter and Setter for time.Time object:
 func (p *Payment) GetPaymentDateString() string {
-	return p.Payment_Date.Format(dateFormat)
+	return p.PaymentDate.Format(dateFormat)
 }
 func (p *Payment) addPaymentDate() {
-	p.Payment_Date = time.Now()
+	p.PaymentDate = time.Now()
 }
 
 // Return all Payments from DB:
@@ -63,7 +63,7 @@ func AllPayments() ([]*Payment, error) {
 	payments := make([]*Payment, 0)
 	for rows.Next() {
 		payment := new(Payment)
-		err := rows.Scan(&payment.Id, &payment.Payment_Type_Id, &payment.Payment_Date, &payment.Amount)
+		err := rows.Scan(&payment.Id, &payment.PaymentTypeId, &payment.PaymentDate, &payment.Amount)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func InsertPayment(p *Payment) error {
 	RETURNING id
 	`
 	id := 0
-	err := db.QueryRow(sql, p.Payment_Type_Id, p.GetPaymentDateString(), p.Amount).Scan(&id)
+	err := db.QueryRow(sql, p.PaymentTypeId, p.GetPaymentDateString(), p.Amount).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func GetMonthlySummary() ([]*MonthlySummary, error) {
 	summaries := make([]*MonthlySummary, 0)
 	for rows.Next() {
 		summary := new(MonthlySummary)
-		err := rows.Scan(&summary.Payment_Type_Id, &summary.Payment_Date, &summary.Amount)
+		err := rows.Scan(&summary.PaymentTypeId, &summary.PaymentDate, &summary.Amount)
 		if err != nil {
 			return nil, err
 		}
@@ -192,13 +192,13 @@ func GetPaymentSummary() ([]*PaymentSummary, error) {
 	summaries := make([]*PaymentSummary, 0)
 	for rows.Next() {
 		summary := new(PaymentSummary)
-		err := rows.Scan(&summary.Payment_Type_Id, &summary.Amount)
+		err := rows.Scan(&summary.PaymentTypeId, &summary.Amount)
 		if err != nil {
 			return nil, err
 		}
 
 		// Add our adjustment from the InitalValues Config map, IF the key exists:
-		if val, ok := config.Budget2Config.InitialValues[summary.Payment_Type_Id]; ok {
+		if val, ok := config.Budget2Config.InitialValues[summary.PaymentTypeId]; ok {
 			summary.Amount = summary.Amount + val
 		}
 		summaries = append(summaries, summary)
