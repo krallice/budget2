@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Budget2</title>
+  <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+				 
+	<title>Budget2</title>
+
 <script>
 function getPaymentTypes() {
 
@@ -177,17 +181,135 @@ function loadBodyAjax() {
 	getMonthlySums();
 }
 </script>
+<style>
+body {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  /* color: white; */
+}
+
+/* table, tr, td {
+	color: white
+} */
+
+h3 {
+  margin-top: 2rem;
+}
+
+.row {
+  margin-bottom: 1rem;
+}
+.row .row {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+[class*="col-"] {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  /* background-color: rgba(86, 61, 124, .15);
+  border: 1px solid rgba(86, 61, 124, .2); */
+}
+
+hr {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+</style>
 </head>
+<!--<body background="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Miles_Davis_Strasbourg_face_2.jpg/170px-Miles_Davis_Strasbourg_face_2.jpg" onload="loadBodyAjax()">-->
 <body onload="loadBodyAjax()">
-	<h2>budget2</h2>
-	<div name="divPayment">
-	  <b>$</b>
-	  <input type="text" id="inputPayment">
-	  <select id="selectPaymentTypes">
-	  </select>
-	  <button id="buttonSubmitPayment" onclick="submitPayment()">Pay</button>
+<div class="container">
+
+	<h1>budget2</h1>
+	<p class="lead">our budget tracking site</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<h3>savings summary</h3>
+			<p>if you're in a hurry, glance here:</p>
+			<table class="table">
+				<tr>
+					<td>Bank Limit<br /><i>(Don't go lower than ...)</i></td>
+					<td><b>$300,000</b></td>
+				</tr>
+				<tr class="table-danger">
+					<td>Saved this month<br /></td>
+					<td>$0</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="col-md-4">
+			<h3>savings breakdown</h3>
+			<p>ok, time for some detail:</p>
+			<table class="table">
+				<tr>
+					<td>Total Locked:</td>
+					<td><b>$290,000</b></td>
+				</tr>
+				<tr>
+					<td>House:</td>
+					<td>$290,000</td>
+				</tr>
+				<tr>
+					<td>Holiday:</td>
+					<td>$290,000</td>
+				</tr>
+				<tr>
+					<td>Sinking:</td>
+					<td>$290,000</td>
+				</tr>
+			</table>
+		</div>
 	</div>
-	<h4>payment summary</h4>
+
+	<h3>contribute</h3>
+	<div class="row">
+		<div class="col-md-4">
+			<div class="input-group mb-3">
+			  <div class="input-group-prepend">
+				<label class="input-group-text" for="inputGroupSelect01">Bucket</label>
+			  </div>
+			  <select class="custom-select" id="inputGroupSelect01">
+				<option selected>Choose...</option>
+				<option value="1">House</option>
+				<option value="2">Holiday</option>
+				<option value="3">Sinking</option>
+			  </select>
+			</div>
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+					<span class="input-group-text" id="basic-addon1">$</span>
+				</div>
+				<input id="inputPayment" type="number" class="form-control" placeholder="100" aria-label="100" aria-describedby="basic-addon1">
+				<div class="input-group-append">
+					<!--<button class="btn btn-outline-secondary" type="button">Button</button>-->
+					<button class="btn btn-success" type="button">Pay</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<h3>house payment summary</h3>
+	<div class="row">
+		<div class="col-md-4">
+			<table class="table">
+				<tr>
+					<th>Month</th>
+					<th>Saving</th>
+				</tr>
+				<tr>
+					<td>August</td>
+					<td>$300</td>
+				</tr>
+				<tr>
+					<td>June</td>
+					<td>$3100</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
 	<div name="divPaymentSummary">
 		<ul id="ulPaymentSummary">
 		</ul>
@@ -202,5 +324,6 @@ function loadBodyAjax() {
       <ul id="ulMonthlySummary">
       </ul>
     </div>
+</div>
 </body>
 </html>
