@@ -4,8 +4,10 @@ import (
 	"budget2/config"
 	"fmt"
 	"time"
+	"strconv"
 )
 
+// An individual payment:
 type Payment struct {
 	Id              int       `json:"id"`
 	Payment_Type_Id int       `json:"payment_type_id"`
@@ -13,6 +15,7 @@ type Payment struct {
 	Amount          float32   `json:"amount"`
 }
 
+// Total amount paid per PaymentType bucket:
 type PaymentSummary struct {
 	Payment_Type_Id int     `json:"payment_type_id"`
 	Amount          float32 `json:"amount"`
@@ -24,8 +27,18 @@ type MonthlySummary struct {
 	Amount          float32 `json:"amount"`
 }
 
-// Horrible golang date formatting string for YYYY-MM-DD:
+// Parent holder object for all payment summary details
+// This provides the high level details for overview
+type BudgetSummary struct {
+	RentPaid		bool					`json:"rentpaid"`
+	Limit			float32					`json:"limit"`
+	TotalLocked		float32					`json:"totallocked"`
+	Totals			[]*PaymentSummary		`json:"totals"`
+}
+
+// Horrible golang date formatting string for YYYY-MM-DD and DD
 const dateFormat string = "2006-01-02"
+const dayFormat string = "02"
 
 // Getter and Setter for time.Time object:
 func (p *Payment) GetPaymentDateString() string {
@@ -124,6 +137,44 @@ func GetMonthlySummary() ([]*MonthlySummary, error) {
 		return nil, err
 	}
 	return summaries, nil
+}
+
+func GetBudgetSummary() (*BudgetSummary, error) {
+
+	var b BudgetSummary
+
+	// Get Base Summary:
+	sql := `
+	SELECT SUM(amount) AS amount FROM payments
+	`
+	row := db.QueryRow(sql)
+	err := row.Scan(&b.TotalLocked)
+	if err != nil {
+		return nil, err
+	}
+
+	// Adjust for rent:
+	currentday := time.Now()
+	cd, err := strconv.Atoi(currentday.Format(dayFormat))
+	if err != nil {
+		return nil, err
+	}
+	if cd <= config.Budget2Config.Rentday {
+		b.RentPaid = false
+		b.Limit = b.TotalLocked + config.Budget2Config.Rentamount
+	} else {
+		b.RentPaid = true
+		b.Limit = b.TotalLocked
+	}
+
+	// Get individual payment type summaries:
+	summaries, err := GetPaymentSummary()
+	if err != nil {
+		return nil, err
+	}
+	b.Totals = summaries
+
+	return &b, nil
 }
 
 // Aggregate the total payment amount for each payment_type:

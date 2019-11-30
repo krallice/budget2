@@ -8,7 +8,7 @@ import (
 type Budget2ConfigStruct struct {
 	Payday int `yaml:"payday"`
 	Rentday int `yaml:"rentday"`
-	Rentamount int `yaml:"rentamount"`
+	Rentamount float32 `yaml:"rentamount"`
 	InitialValues map[int]float32 `yaml:"initial-values"`
 
 }
