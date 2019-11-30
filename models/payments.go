@@ -4,35 +4,50 @@ import (
 	"budget2/config"
 	"fmt"
 	"time"
+	"strconv"
 )
 
+// An individual payment:
 type Payment struct {
 	Id              int       `json:"id"`
-	Payment_Type_Id int       `json:"payment_type_id"`
-	Payment_Date    time.Time `json:"payment_date"`
+	PaymentTypeId	int       `json:"payment_type_id"`
+	PaymentDate		time.Time `json:"payment_date"`
 	Amount          float32   `json:"amount"`
 }
 
+// Total amount paid per PaymentType bucket:
 type PaymentSummary struct {
-	Payment_Type_Id int     `json:"payment_type_id"`
+	PaymentTypeId	int     `json:"payment_type_id"`
 	Amount          float32 `json:"amount"`
 }
 
 type MonthlySummary struct {
-	Payment_Type_Id int     `json:"payment_type_id"`
-	Payment_Date    time.Time `json:"payment_date"`
+	PaymentTypeId	int     `json:"payment_type_id"`
+	PaymentDate		time.Time `json:"payment_date"`
 	Amount          float32 `json:"amount"`
 }
 
-// Horrible golang date formatting string for YYYY-MM-DD:
+// Parent holder object for all payment summary details
+// This provides the high level details for overview
+type BudgetSummary struct {
+	RentPaid		bool					`json:"rentpaid"`
+	// Limit = RentAmount + TotalLocked
+	Limit			float32					`json:"limit"`
+	TotalLocked		float32					`json:"totallocked"`
+	LockedThisMonth float32					`json:"lockedthismonth"`
+	Totals			[]*PaymentSummary		`json:"totals"`
+}
+
+// Horrible golang date formatting string for YYYY-MM-DD and DD
 const dateFormat string = "2006-01-02"
+const dayFormat string = "02"
 
 // Getter and Setter for time.Time object:
 func (p *Payment) GetPaymentDateString() string {
-	return p.Payment_Date.Format(dateFormat)
+	return p.PaymentDate.Format(dateFormat)
 }
 func (p *Payment) addPaymentDate() {
-	p.Payment_Date = time.Now()
+	p.PaymentDate = time.Now()
 }
 
 // Return all Payments from DB:
@@ -50,7 +65,7 @@ func AllPayments() ([]*Payment, error) {
 	payments := make([]*Payment, 0)
 	for rows.Next() {
 		payment := new(Payment)
-		err := rows.Scan(&payment.Id, &payment.Payment_Type_Id, &payment.Payment_Date, &payment.Amount)
+		err := rows.Scan(&payment.Id, &payment.PaymentTypeId, &payment.PaymentDate, &payment.Amount)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +89,7 @@ func InsertPayment(p *Payment) error {
 	RETURNING id
 	`
 	id := 0
-	err := db.QueryRow(sql, p.Payment_Type_Id, p.GetPaymentDateString(), p.Amount).Scan(&id)
+	err := db.QueryRow(sql, p.PaymentTypeId, p.GetPaymentDateString(), p.Amount).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -114,7 +129,7 @@ func GetMonthlySummary() ([]*MonthlySummary, error) {
 	summaries := make([]*MonthlySummary, 0)
 	for rows.Next() {
 		summary := new(MonthlySummary)
-		err := rows.Scan(&summary.Payment_Type_Id, &summary.Payment_Date, &summary.Amount)
+		err := rows.Scan(&summary.PaymentTypeId, &summary.PaymentDate, &summary.Amount)
 		if err != nil {
 			return nil, err
 		}
@@ -124,6 +139,79 @@ func GetMonthlySummary() ([]*MonthlySummary, error) {
 		return nil, err
 	}
 	return summaries, nil
+}
+
+func GetBudgetSummary() (*BudgetSummary, error) {
+
+	var b BudgetSummary
+
+	currentday := time.Now()
+
+	// Get Base Summary:
+	sql := `
+	SELECT SUM(amount) AS amount FROM payments
+	`
+	row := db.QueryRow(sql)
+	err := row.Scan(&b.TotalLocked)
+	if err != nil {
+		return nil, err
+	}
+
+	// Locked this month:
+	sql = `
+	SELECT amount FROM 
+		(SELECT 
+			payment_type_id,
+			CASE 
+				WHEN date_part('day', payment_date) < %d THEN 
+					date_trunc('month', payment_date) + interval '-1month %d days'
+				ELSE date_trunc('month', payment_date) + interval '%d days'
+			END AS payment_date,
+			SUM(amount) AS amount
+		FROM
+			payments
+		WHERE
+			payment_type_id = 1
+		GROUP BY 1,2) AS agg_values
+	WHERE
+		CASE 
+			WHEN date_part('day', CURRENT_DATE) < %d THEN 
+				payment_date = date_trunc('month', CURRENT_DATE) + interval '-1month %d days'
+			ELSE 
+				payment_date = date_trunc('month', CURRENT_DATE) + interval '%d days'
+		END
+	`
+	// Substitute the %d values in sql with the Payday values from our master config structure
+	// Subtract one from the value as months start on day 1, not day 0:
+	paydayoffset := config.Budget2Config.Payday - 1
+	sql = fmt.Sprintf(sql, config.Budget2Config.Payday, paydayoffset, paydayoffset, config.Budget2Config.Payday, paydayoffset, paydayoffset)
+	row = db.QueryRow(sql)
+	err = row.Scan(&b.LockedThisMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	// Adjust for rent:
+	cd, err := strconv.Atoi(currentday.Format(dayFormat))
+	if err != nil {
+		return nil, err
+	}
+	if cd <= config.Budget2Config.Rentday {
+		b.RentPaid = false
+		b.Limit = b.TotalLocked + config.Budget2Config.Rentamount
+	} else {
+		b.RentPaid = true
+		b.Limit = b.TotalLocked
+	}
+
+	// Get individual payment type summaries:
+	summaries, err := GetPaymentSummary()
+	if err != nil {
+		return nil, err
+	}
+	b.Totals = summaries
+
+	return &b, nil
 }
 
 // Aggregate the total payment amount for each payment_type:
@@ -141,13 +229,13 @@ func GetPaymentSummary() ([]*PaymentSummary, error) {
 	summaries := make([]*PaymentSummary, 0)
 	for rows.Next() {
 		summary := new(PaymentSummary)
-		err := rows.Scan(&summary.Payment_Type_Id, &summary.Amount)
+		err := rows.Scan(&summary.PaymentTypeId, &summary.Amount)
 		if err != nil {
 			return nil, err
 		}
 
 		// Add our adjustment from the InitalValues Config map, IF the key exists:
-		if val, ok := config.Budget2Config.InitialValues[summary.Payment_Type_Id]; ok {
+		if val, ok := config.Budget2Config.InitialValues[summary.PaymentTypeId]; ok {
 			summary.Amount = summary.Amount + val
 		}
 		summaries = append(summaries, summary)

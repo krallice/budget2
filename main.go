@@ -39,7 +39,9 @@ func main() {
 	http.HandleFunc("/", getIndex)
 
 	// AJAX Functions:
-	http.HandleFunc("/ajax/payment_types", ajaxPaymentTypes)
+	http.HandleFunc("/ajax/budgetsummary", ajaxBudgetSummary)
+	http.HandleFunc("/ajax/paymenttypes", ajaxPaymentTypes)
+
 	http.HandleFunc("/ajax/payments", ajaxPayments)
 	http.HandleFunc("/ajax/paymentsummary", ajaxPaymentSummary)
 	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)
@@ -57,6 +59,27 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl := template.Must(template.ParseFiles("./templates/index.html"))
 	tmpl.Execute(w, nil)
+}
+
+// Returns our master BudgetSummary Struct as JSON:
+func ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+	sum, err := models.GetBudgetSummary()
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	jreply, err := json.Marshal(sum)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jreply)
 }
 
 // Returns all PaymentTypes in DB as a JSON object:
