@@ -8,6 +8,11 @@
 	<title>Budget2</title>
 
 <script>
+
+function numberWithCommas(x) {
+		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function getPaymentTypes() {
 
 	// Create new request object:
@@ -140,6 +145,51 @@ function getMonthlySums() {
 	reqMonthlySums.send();
 }
 
+// Function that gets our budget summary, populates the page with data
+// and applies conditional formatting if required.
+function getBudgetSummary() {
+
+	// Create new request object:
+	var reqBudgetSummary = new XMLHttpRequest();
+	reqBudgetSummary.open("GET", "/ajax/budgetsummary");
+
+	// Define event listener:
+	reqBudgetSummary.onreadystatechange = function() {
+
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
+
+			// Parse the returned data and find our select object:
+			var data = JSON.parse(this.responseText);
+
+			// Savings Summary:
+			document.getElementById("limit").innerHTML = "$" + numberWithCommas(data["limit"]);
+			document.getElementById("lockedthismonth").innerHTML = "$" + numberWithCommas(data["lockedthismonth"]);
+			if ( ! data["lockedthismonth"] > 0 ) {
+				document.getElementById("trlockedthismonth").classList.add("table-danger");
+			}
+
+			// Savings Breakdown:
+			document.getElementById("totallocked").innerHTML = "$" + numberWithCommas(data["totallocked"]);
+			var tableSavingsBreakdown = document.getElementById("tablesavingsbreakdown");
+			data["totals"].forEach( function(obj) {
+				
+				var newRow = tableSavingsBreakdown.insertRow();
+
+				var newCell1 = newRow.insertCell(0);
+				var newCell1Text = document.createTextNode(obj["payment_type_id"]);
+				newCell1.appendChild(newCell1Text);
+
+				var newCell2 = newRow.insertCell(1);
+				var newCell2Text = document.createTextNode("$" + numberWithCommas(obj["amount"]));
+				newCell2.appendChild(newCell2Text);
+			});
+		}
+	};
+	// Fire off the request:
+	reqBudgetSummary.send();
+}
+
 // Submit payment to server
 function submitPayment() {
 
@@ -175,7 +225,10 @@ function submitPayment() {
 
 // Function loaded when body is ready:
 function loadBodyAjax() {
+
 	getPaymentTypes();
+	getBudgetSummary();
+
 	getPaymentSums();
 	getPaymentHistory();
 	getMonthlySums();
@@ -230,11 +283,11 @@ hr {
 			<table class="table">
 				<tr>
 					<td>Bank Limit<br /><i>(Don't go lower than ...)</i></td>
-					<td><b>$300,000</b></td>
+					<td><b><div id="limit"></div></b></td>
 				</tr>
-				<tr class="table-danger">
+				<tr id="trlockedthismonth" class="">
 					<td>Saved this month<br /></td>
-					<td>$0</td>
+					<td><div id="lockedthismonth"></div></td>
 				</tr>
 			</table>
 		</div>
@@ -242,12 +295,12 @@ hr {
 		<div class="col-md-4">
 			<h3>savings breakdown</h3>
 			<p>ok, time for some detail:</p>
-			<table class="table">
+			<table id="tablesavingsbreakdown" class="table">
 				<tr>
 					<td>Total Locked:</td>
-					<td><b>$290,000</b></td>
+					<td><b><div id="totallocked"></div></b></td>
 				</tr>
-				<tr>
+				<!-- <tr>
 					<td>House:</td>
 					<td>$290,000</td>
 				</tr>
@@ -258,7 +311,7 @@ hr {
 				<tr>
 					<td>Sinking:</td>
 					<td>$290,000</td>
-				</tr>
+				</tr> -->
 			</table>
 		</div>
 	</div>
