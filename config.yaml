@@ -1,4 +1,6 @@
 payday: 15
+rentday: 10
+rentamount: 3000
 initial-values:
     # Initial House value:
     1: 10000
