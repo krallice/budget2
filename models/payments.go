@@ -156,6 +156,10 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Don't forget to add our starting values:
+	for _, v := range config.Budget2Config.InitialValues {
+		b.TotalLocked = b.TotalLocked + v
+	}
 
 	// Locked this month:
 	sql = `
@@ -218,7 +222,7 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 func GetPaymentSummary() ([]*PaymentSummary, error) {
 
 	sql := `
-	SELECT payment_type_id, SUM(amount) as amount FROM payments GROUP BY payment_type_id
+	SELECT payment_type_id, SUM(amount) as amount FROM payments GROUP BY payment_type_id ORDER BY payment_type_id ASC
 	`
 	rows, err := db.Query(sql)
 	if err != nil {

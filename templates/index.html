@@ -9,32 +9,38 @@
 
 <script>
 
+// Global variable mapping payment_type_id to name:
+var paymentTypes = new Object();
+
+// Helper function to add commas to numeric strings:
 function numberWithCommas(x) {
 		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+function capitaliseFLetter(x) {
+		return x[0].toUpperCase() + x.slice(1);
+}
+
+// Get ourr PaymentTypes and populate our global map object:
 function getPaymentTypes() {
 
-	// Create new request object:
 	var reqPaymentTypes = new XMLHttpRequest();
 	reqPaymentTypes.open("GET", "/ajax/paymenttypes");
 
-	// Define event listener:
 	reqPaymentTypes.onreadystatechange = function() {
-
-		// Check if the request completed and was successful:
 		if (this.readyState == 4 && this.status == 200) {
 
-			// Parse the returned data and find our select object:
 			var data = JSON.parse(this.responseText);
 			var selectPaymentTypes = document.getElementById("selectPaymentTypes")
 
-			// Foreach element returned in the JSON,
-			// dynamically create our option object:
 			data.forEach( function(obj) {
+
+				// Populate our global variable:
+				paymentTypes[obj.id] = obj.name;
+
 				var option = document.createElement("option");
 				option.value = obj.id;
-				option.text = obj.name;
+				option.text = capitaliseFLetter(obj.name);
 				selectPaymentTypes.add(option);
 			});
 		}
@@ -42,6 +48,52 @@ function getPaymentTypes() {
 	// Fire off the request:
 	reqPaymentTypes.send();
 }
+
+// Function that gets our budget summary, populates the page with data
+// and applies conditional formatting if required.
+function getBudgetSummary() {
+
+	// Create new request object:
+	var reqBudgetSummary = new XMLHttpRequest();
+	reqBudgetSummary.open("GET", "/ajax/budgetsummary");
+
+	// Define event listener:
+	reqBudgetSummary.onreadystatechange = function() {
+
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
+
+			// Parse the returned data and find our select object:
+			var data = JSON.parse(this.responseText);
+
+			// Savings Summary:
+			document.getElementById("limit").innerHTML = "$" + numberWithCommas(data["limit"]);
+			document.getElementById("lockedthismonth").innerHTML = "$" + numberWithCommas(data["lockedthismonth"]);
+			if ( ! data["lockedthismonth"] > 0 ) {
+				document.getElementById("trlockedthismonth").classList.add("table-danger");
+			}
+
+			// Savings Breakdown:
+			document.getElementById("totallocked").innerHTML = "$" + numberWithCommas(data["totallocked"]);
+			var tableSavingsBreakdown = document.getElementById("tablesavingsbreakdown");
+			data["totals"].forEach( function(obj) {
+				
+				var newRow = tableSavingsBreakdown.insertRow();
+
+				var newCell1 = newRow.insertCell(0);
+				var newCell1Text = document.createTextNode(capitaliseFLetter(paymentTypes[obj["payment_type_id"]]));
+				newCell1.appendChild(newCell1Text);
+
+				var newCell2 = newRow.insertCell(1);
+				var newCell2Text = document.createTextNode("$" + numberWithCommas(obj["amount"]));
+				newCell2.appendChild(newCell2Text);
+			});
+		}
+	};
+	// Fire off the request:
+	reqBudgetSummary.send();
+}
+
 
 function getPaymentHistory() {
 
@@ -144,52 +196,6 @@ function getMonthlySums() {
 	// Fire off the request:
 	reqMonthlySums.send();
 }
-
-// Function that gets our budget summary, populates the page with data
-// and applies conditional formatting if required.
-function getBudgetSummary() {
-
-	// Create new request object:
-	var reqBudgetSummary = new XMLHttpRequest();
-	reqBudgetSummary.open("GET", "/ajax/budgetsummary");
-
-	// Define event listener:
-	reqBudgetSummary.onreadystatechange = function() {
-
-		// Check if the request completed and was successful:
-		if (this.readyState == 4 && this.status == 200) {
-
-			// Parse the returned data and find our select object:
-			var data = JSON.parse(this.responseText);
-
-			// Savings Summary:
-			document.getElementById("limit").innerHTML = "$" + numberWithCommas(data["limit"]);
-			document.getElementById("lockedthismonth").innerHTML = "$" + numberWithCommas(data["lockedthismonth"]);
-			if ( ! data["lockedthismonth"] > 0 ) {
-				document.getElementById("trlockedthismonth").classList.add("table-danger");
-			}
-
-			// Savings Breakdown:
-			document.getElementById("totallocked").innerHTML = "$" + numberWithCommas(data["totallocked"]);
-			var tableSavingsBreakdown = document.getElementById("tablesavingsbreakdown");
-			data["totals"].forEach( function(obj) {
-				
-				var newRow = tableSavingsBreakdown.insertRow();
-
-				var newCell1 = newRow.insertCell(0);
-				var newCell1Text = document.createTextNode(obj["payment_type_id"]);
-				newCell1.appendChild(newCell1Text);
-
-				var newCell2 = newRow.insertCell(1);
-				var newCell2Text = document.createTextNode("$" + numberWithCommas(obj["amount"]));
-				newCell2.appendChild(newCell2Text);
-			});
-		}
-	};
-	// Fire off the request:
-	reqBudgetSummary.send();
-}
-
 // Submit payment to server
 function submitPayment() {
 
@@ -323,11 +329,11 @@ hr {
 			  <div class="input-group-prepend">
 				<label class="input-group-text" for="inputGroupSelect01">Bucket</label>
 			  </div>
-			  <select class="custom-select" id="inputGroupSelect01">
+			  <select class="custom-select" id="selectPaymentTypes">
 				<option selected>Choose...</option>
-				<option value="1">House</option>
+				<!-- <option value="1">House</option>
 				<option value="2">Holiday</option>
-				<option value="3">Sinking</option>
+				<option value="3">Sinking</option> -->
 			  </select>
 			</div>
 			<div class="input-group mb-3">
