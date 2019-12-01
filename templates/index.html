@@ -33,6 +33,9 @@ function getPaymentTypes() {
 			var data = JSON.parse(this.responseText);
 			var selectPaymentTypes = document.getElementById("selectPaymentTypes")
 
+			// Clear our select box:
+			selectPaymentTypes.options.length = 0;
+
 			data.forEach( function(obj) {
 
 				// Populate our global variable:
@@ -76,6 +79,15 @@ function getBudgetSummary() {
 			// Savings Breakdown:
 			document.getElementById("totallocked").innerHTML = "$" + numberWithCommas(data["totallocked"]);
 			var tableSavingsBreakdown = document.getElementById("tablesavingsbreakdown");
+
+			// Clear our table:
+			var rows = tableSavingsBreakdown.rows;
+			var i = rows.length;
+			while (--i) {
+				tableSavingsBreakdown.deleteRow(i);
+			}
+
+			// Now populate our table:
 			data["totals"].forEach( function(obj) {
 				
 				var newRow = tableSavingsBreakdown.insertRow();
@@ -199,15 +211,23 @@ function getMonthlySums() {
 // Submit payment to server
 function submitPayment() {
 
+	// Get our payment type:
 	var selectPaymentTypes = document.getElementById("selectPaymentTypes");
 	var paymentType = selectPaymentTypes.options[selectPaymentTypes.selectedIndex];
+	if (paymentType.value == 0) {
+		alert("Please select a payment bucket");
+		return;
+	}
 	var payment_type_id = parseInt(paymentType.value);
 
+	// Get our payment value:
 	var amount = parseFloat(document.getElementById("inputPayment").value);
 	if (amount == 0) {
 		alert("Please entire an amount to pay");
 		return;
 	}
+
+	// Populate json struct to send to backend:
 	var paymentJSON = {
 		"payment_type_id": 	payment_type_id,
 		"amount":			amount
@@ -220,8 +240,7 @@ function submitPayment() {
 	reqAddPayment.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			// Refresh current display:
-			getPaymentHistory();
-			getMonthlySums();
+			loadBodyAjax();
 		}
 	};
 
@@ -232,10 +251,15 @@ function submitPayment() {
 // Function loaded when body is ready:
 function loadBodyAjax() {
 
+	// Populate our master paymentTypes and
+	// get our main budget summary:
 	getPaymentTypes();
 	getBudgetSummary();
 
+	// Individual Bucket Breakdowns:
 	getPaymentSums();
+
+	// Deprecated:
 	getPaymentHistory();
 	getMonthlySums();
 }
@@ -330,7 +354,7 @@ hr {
 				<label class="input-group-text" for="inputGroupSelect01">Bucket</label>
 			  </div>
 			  <select class="custom-select" id="selectPaymentTypes">
-				<option selected>Choose...</option>
+				<option selected value="0">Choose...</option>
 				<!-- <option value="1">House</option>
 				<option value="2">Holiday</option>
 				<option value="3">Sinking</option> -->
@@ -343,7 +367,7 @@ hr {
 				<input id="inputPayment" type="number" class="form-control" placeholder="100" aria-label="100" aria-describedby="basic-addon1">
 				<div class="input-group-append">
 					<!--<button class="btn btn-outline-secondary" type="button">Button</button>-->
-					<button class="btn btn-success" type="button">Pay</button>
+					<button id="btnpay" class="btn btn-success" type="button" onclick="submitPayment()">Pay</button>
 				</div>
 			</div>
 		</div>
