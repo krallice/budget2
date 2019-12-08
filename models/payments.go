@@ -101,17 +101,6 @@ func InsertPayment(p *Payment) error {
 // Aggregate the payment amounts based upon our pay boundary:
 func GetMonthlySummary() ([]*MonthlySummary, error) {
 
-	sql :=
-	`
-	SELECT 
-		payment_type_id,
-		date_trunc('month', payment_date - interval '%d day') + interval '%d day' as payment_date,
-		SUM(amount)
-	FROM payments
-	GROUP by 1, 2
-	ORDER by 2 DESC;
-	`
-
 	// Old Ineffient Query:
 	// sql := `
 	// SELECT 
@@ -132,6 +121,18 @@ func GetMonthlySummary() ([]*MonthlySummary, error) {
 
 	// Substitute the %d values in sql with the Payday values from our master config structure
 	// Subtract one from the value as months start on day 1, not day 0:
+
+	// New efficient monthly summary query:
+	sql :=
+	`
+	SELECT 
+		payment_type_id,
+		date_trunc('month', payment_date - interval '%d day') + interval '%d day' as payment_date,
+		SUM(amount)
+	FROM payments
+	GROUP by 1, 2
+	ORDER by 2 DESC;
+	`
 	paydayoffset := config.Budget2Config.Payday - 1
 	sql = fmt.Sprintf(sql, paydayoffset, paydayoffset)
 
@@ -277,6 +278,55 @@ func GetPaymentSummary() ([]*PaymentSummary, error) {
 		}
 		summaries = append(summaries, summary)
 	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return summaries, nil
+}
+
+// Get our last 6 month recent house history figures:
+func GetRecentHouseHistory() ([]*MonthlySummary, error) {
+
+	sql := `
+	SELECT
+			payment_date, COALESCE(amount, 0)
+	FROM
+		generate_series(
+			(date_trunc('month', CURRENT_DATE - interval '%d day') - interval '5 month' + interval '%d day')::timestamp, 
+			(date_trunc('month', CURRENT_DATE - interval '%d day') + interval '%d day')::timestamp, 
+			interval '1 month') AS payment_date
+	LEFT JOIN
+	(
+		SELECT 
+			date_trunc('month', payment_date - interval '%d day') + interval '%d day' as month_15,
+			SUM(amount) AS amount
+		FROM payments
+		WHERE payment_type_id = 1
+		GROUP BY payment_type_id, month_15
+		ORDER BY payment_type_id, month_15
+	) 
+	AS y ON payment_date=y.month_15
+	ORDER BY payment_date DESC;
+	`
+	paydayoffset := config.Budget2Config.Payday - 1
+	sql = fmt.Sprintf(sql, paydayoffset, paydayoffset, paydayoffset, paydayoffset, paydayoffset, paydayoffset)
+
+	rows, err := db.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	summaries := make([]*MonthlySummary, 0)
+	for rows.Next() {
+		summary := new(MonthlySummary)
+		err := rows.Scan(&summary.PaymentDate, &summary.Amount)
+		if err != nil {
+			return nil, err
+		}
+		summaries = append(summaries, summary)
+	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}

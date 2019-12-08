@@ -41,6 +41,7 @@ func main() {
 	// AJAX Functions:
 	http.HandleFunc("/ajax/budgetsummary", ajaxBudgetSummary)
 	http.HandleFunc("/ajax/paymenttypes", ajaxPaymentTypes)
+	http.HandleFunc("/ajax/recenthousehistory", ajaxRecentHouseHistory)
 
 	http.HandleFunc("/ajax/payments", ajaxPayments)
 	http.HandleFunc("/ajax/paymentsummary", ajaxPaymentSummary)
@@ -182,4 +183,26 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
 		return
 	}
+}
+
+// Returns a summary of recent house payments:
+func ajaxRecentHouseHistory(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), 405)
+		return
+	}
+	sums, err := models.GetRecentHouseHistory()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+	jreply, err := json.Marshal(sums)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jreply)
 }
