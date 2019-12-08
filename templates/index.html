@@ -86,6 +86,11 @@ function getBudgetSummary() {
 			if ( ! data["lockedthismonth"] > 0 ) {
 				document.getElementById("trlockedthismonth").classList.add("table-danger");
 			}
+			if ( ! data["rentpaid"] ) { 
+				document.getElementById("rentadvice").innerHTML = "(Assumes rent has NOT been paid)";
+			} else {
+				document.getElementById("rentadvice").innerHTML = "(Assumes rent HAS been paid)";
+			}
 
 			// Savings Breakdown:
 			document.getElementById("totallocked").innerHTML = "$" + numberWithCommas(data["totallocked"]);
@@ -304,7 +309,10 @@ hr {
 			<p>if you're in a hurry, glance here:</p>
 			<table class="table">
 				<tr>
-					<td>Bank Limit<br /><i>(Don't go lower than ...)</i></td>
+					<td>Bank Limit<br />
+						<i>(Don't go lower than ...)</i><br />
+						<i><div id="rentadvice"></div></i>
+					</td>
 					<td><b><div id="limit"></div></b></td>
 				</tr>
 				<tr id="trlockedthismonth" class="">
