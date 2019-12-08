@@ -259,6 +259,7 @@ function submitPayment() {
 	reqAddPayment.send(JSON.stringify(paymentJSON));
 }
 
+// Get our most recent monthly totals for the House fund:
 function getRecentHouseHistory() {
 
 	// Create new request object:
@@ -288,7 +289,6 @@ function getRecentHouseHistory() {
 				var newRow = tableHouseHistory.insertRow();
 
 				var newCell1 = newRow.insertCell(0);
-				//var newCell1Text = document.createTextNode(capitaliseFLetter(paymentTypes[obj["payment_type_id"]]));
 				var newCell1Text = document.createTextNode(convertDateToMonthString(obj["payment_date"]));
 				newCell1.appendChild(newCell1Text);
 
@@ -313,6 +313,7 @@ function loadBodyAjax() {
 	// Individual Bucket Breakdowns:
 	getPaymentSums();
 
+	// Get our most recent monthly totals for the House fund:
 	getRecentHouseHistory();
 
 	// Deprecated:
