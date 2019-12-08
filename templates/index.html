@@ -21,6 +21,17 @@ function capitaliseFLetter(x) {
 		return x[0].toUpperCase() + x.slice(1);
 }
 
+// Helper function to convert a postgres date string representation
+// into a human readable month.
+function convertDateToMonthString(x) {
+	const rx = /[0-9]{4}-([0-9]{2})/g;
+	const monthNames = ["January", "February", "March", "April", "May", "June",
+	  "July", "August", "September", "October", "November", "December"
+	];
+	var capture = rx.exec(x);
+	return monthNames[parseInt(capture[1]) - 1];
+}
+
 // Get ourr PaymentTypes and populate our global map object:
 function getPaymentTypes() {
 
@@ -248,6 +259,49 @@ function submitPayment() {
 	reqAddPayment.send(JSON.stringify(paymentJSON));
 }
 
+function getRecentHouseHistory() {
+
+	// Create new request object:
+	var reqMonthlySums = new XMLHttpRequest();
+	reqMonthlySums.open("GET", "/ajax/recenthousehistory");
+
+	// Define event listener:
+	reqMonthlySums.onreadystatechange = function() {
+
+		// Check if the request completed and was successful:
+		if (this.readyState == 4 && this.status == 200) {
+
+			var data = JSON.parse(this.responseText);
+			var tableHouseHistory = document.getElementById("tablehousehistory");
+
+			// Clear our table:
+			var rows = tableHouseHistory.rows;
+			var i = rows.length;
+			while (--i) {
+				tableHouseHistory.deleteRow(i);
+			}
+
+			// Foreach element returned in the JSON,
+			// dynamically create our option object:
+			data.forEach( function(obj) {
+				
+				var newRow = tableHouseHistory.insertRow();
+
+				var newCell1 = newRow.insertCell(0);
+				//var newCell1Text = document.createTextNode(capitaliseFLetter(paymentTypes[obj["payment_type_id"]]));
+				var newCell1Text = document.createTextNode(convertDateToMonthString(obj["payment_date"]));
+				newCell1.appendChild(newCell1Text);
+
+				var newCell2 = newRow.insertCell(1);
+				var newCell2Text = document.createTextNode("$" + numberWithCommas(obj["amount"]));
+				newCell2.appendChild(newCell2Text);
+			});
+		}
+	};
+	// Fire off the request:
+	reqMonthlySums.send();
+}
+
 // Function loaded when body is ready:
 function loadBodyAjax() {
 
@@ -258,6 +312,8 @@ function loadBodyAjax() {
 
 	// Individual Bucket Breakdowns:
 	getPaymentSums();
+
+	getRecentHouseHistory();
 
 	// Deprecated:
 	getPaymentHistory();
@@ -330,18 +386,6 @@ hr {
 					<td>Total Locked:</td>
 					<td><b><div id="totallocked"></div></b></td>
 				</tr>
-				<!-- <tr>
-					<td>House:</td>
-					<td>$290,000</td>
-				</tr>
-				<tr>
-					<td>Holiday:</td>
-					<td>$290,000</td>
-				</tr>
-				<tr>
-					<td>Sinking:</td>
-					<td>$290,000</td>
-				</tr> -->
 			</table>
 		</div>
 	</div>
@@ -373,21 +417,13 @@ hr {
 		</div>
 	</div>
 
-	<h3>house payment summary</h3>
+	<h3>house summary</h3>
 	<div class="row">
 		<div class="col-md-4">
-			<table class="table">
+			<table id="tablehousehistory" class="table">
 				<tr>
 					<th>Month</th>
 					<th>Saving</th>
-				</tr>
-				<tr>
-					<td>August</td>
-					<td>$300</td>
-				</tr>
-				<tr>
-					<td>June</td>
-					<td>$3100</td>
 				</tr>
 			</table>
 		</div>
