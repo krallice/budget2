@@ -36,7 +36,7 @@ function convertDateToMonthString(x) {
 function getPaymentTypes() {
 
 	var reqPaymentTypes = new XMLHttpRequest();
-	reqPaymentTypes.open("GET", "/ajax/paymenttypes");
+	reqPaymentTypes.open("GET", "/api/v1/paymenttypes");
 
 	reqPaymentTypes.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
@@ -69,7 +69,7 @@ function getBudgetSummary() {
 
 	// Create new request object:
 	var reqBudgetSummary = new XMLHttpRequest();
-	reqBudgetSummary.open("GET", "/ajax/budgetsummary");
+	reqBudgetSummary.open("GET", "/api/v1/budgetsummary");
 
 	// Define event listener:
 	reqBudgetSummary.onreadystatechange = function() {
@@ -121,7 +121,7 @@ function getPaymentSums() {
 
 	// Create new request object:
 	var reqPaymentSums = new XMLHttpRequest();
-	reqPaymentSums.open("GET", "/ajax/paymentsummary");
+	reqPaymentSums.open("GET", "/api/v1/paymentsummary");
 
 	// Define event listener:
 	reqPaymentSums.onreadystatechange = function() {
@@ -178,7 +178,7 @@ function submitPayment() {
 
 	// Create new request object:
 	var reqAddPayment = new XMLHttpRequest();
-	reqAddPayment.open("POST", "/ajax/payments");
+	reqAddPayment.open("POST", "/api/v1/payments");
 	reqAddPayment.setRequestHeader("Content-type", "application/json");
 	reqAddPayment.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
@@ -196,7 +196,7 @@ function getRecentHouseHistory() {
 
 	// Create new request object:
 	var reqMonthlySums = new XMLHttpRequest();
-	reqMonthlySums.open("GET", "/ajax/recenthousehistory");
+	reqMonthlySums.open("GET", "/api/v1/recenthousehistory");
 
 	// Define event listener:
 	reqMonthlySums.onreadystatechange = function() {

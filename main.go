@@ -39,11 +39,11 @@ func main() {
 	http.HandleFunc("/", getIndex)
 
 	// AJAX Functions:
-	http.HandleFunc("/ajax/budgetsummary", ajaxBudgetSummary)
-	http.HandleFunc("/ajax/paymenttypes", ajaxPaymentTypes)
-	http.HandleFunc("/ajax/recenthousehistory", ajaxRecentHouseHistory)
+	http.HandleFunc("/api/v1/budgetsummary", ajaxBudgetSummary)
+	http.HandleFunc("/api/v1/paymenttypes", ajaxPaymentTypes)
+	http.HandleFunc("/api/v1/recenthousehistory", ajaxRecentHouseHistory)
 
-	http.HandleFunc("/ajax/payments", ajaxPayments)
+	http.HandleFunc("/api/v1/payments", ajaxPayments)
 
 	log.Print("Webserver UP")
 	http.ListenAndServe(":3000", nil)
