@@ -44,8 +44,6 @@ func main() {
 	http.HandleFunc("/ajax/recenthousehistory", ajaxRecentHouseHistory)
 
 	http.HandleFunc("/ajax/payments", ajaxPayments)
-	http.HandleFunc("/ajax/paymentsummary", ajaxPaymentSummary)
-	http.HandleFunc("/ajax/monthlysummary", ajaxMonthlySummary)
 
 	log.Print("Webserver UP")
 	http.ListenAndServe(":3000", nil)
@@ -96,49 +94,6 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jreply, err := json.Marshal(pts)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jreply)
-}
-
-// Returns a list of aggregated monthly summaries of Payments
-func ajaxMonthlySummary(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-	sums, err := models.GetMonthlySummary()
-	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	jreply, err := json.Marshal(sums)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jreply)
-}
-
-// Returns a total summed amount of payments:
-func ajaxPaymentSummary(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-	sums, err := models.GetPaymentSummary()
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-	jreply, err := json.Marshal(sums)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

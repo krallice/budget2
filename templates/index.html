@@ -117,41 +117,6 @@ function getBudgetSummary() {
 	reqBudgetSummary.send();
 }
 
-
-function getPaymentHistory() {
-
-	// Create new request object:
-	var reqPaymentHistory = new XMLHttpRequest();
-	reqPaymentHistory.open("GET", "/ajax/payments");
-
-	// Define event listener:
-	reqPaymentHistory.onreadystatechange = function() {
-
-		// Check if the request completed and was successful:
-		if (this.readyState == 4 && this.status == 200) {
-
-			// Parse the returned data and find our select object:
-			var data = JSON.parse(this.responseText);
-			var ulPaymentHistory = document.getElementById("ulPaymentHistory")
-
-			// Clean our Li before re-adding children:
-			while (ulPaymentHistory.firstChild) {
-				ulPaymentHistory.removeChild(ulPaymentHistory.firstChild);
-			}
-
-			// Foreach element returned in the JSON,
-			// dynamically create our option object:
-			data.forEach( function(obj) {
-				var li = document.createElement("li");
-				li.innerHTML = JSON.stringify(obj, null, 2);
-				ulPaymentHistory.appendChild(li);
-			});
-		}
-	};
-	// Fire off the request:
-	reqPaymentHistory.send();
-}
-
 function getPaymentSums() {
 
 	// Create new request object:
@@ -186,39 +151,6 @@ function getPaymentSums() {
 	reqPaymentSums.send();
 }
 
-function getMonthlySums() {
-
-	// Create new request object:
-	var reqMonthlySums = new XMLHttpRequest();
-	reqMonthlySums.open("GET", "/ajax/monthlysummary");
-
-	// Define event listener:
-	reqMonthlySums.onreadystatechange = function() {
-
-		// Check if the request completed and was successful:
-		if (this.readyState == 4 && this.status == 200) {
-
-			// Parse the returned data and find our select object:
-			var data = JSON.parse(this.responseText);
-			var ulMonthlySummary = document.getElementById("ulMonthlySummary")
-
-			// Clean our Li before re-adding children:
-			while (ulMonthlySummary.firstChild) {
-				ulMonthlySummary.removeChild(ulMonthlySummary.firstChild);
-			}
-
-			// Foreach element returned in the JSON,
-			// dynamically create our option object:
-			data.forEach( function(obj) {
-				var li = document.createElement("li");
-				li.innerHTML = JSON.stringify(obj, null, 2);
-				ulMonthlySummary.appendChild(li);
-			});
-		}
-	};
-	// Fire off the request:
-	reqMonthlySums.send();
-}
 // Submit payment to server
 function submitPayment() {
 
@@ -305,7 +237,7 @@ function getRecentHouseHistory() {
 			});
 
 			average = average / n;
-			document.getElementById("averagehousehistory").innerHTML = Math.ceil(average);
+			document.getElementById("averagehousehistory").innerHTML = "$" + Math.ceil(average);
 		}
 	};
 	// Fire off the request:
@@ -320,15 +252,8 @@ function loadBodyAjax() {
 	getPaymentTypes();
 	getBudgetSummary();
 
-	// Individual Bucket Breakdowns:
-	getPaymentSums();
-
 	// Get our most recent monthly totals for the House fund:
 	getRecentHouseHistory();
-
-	// Deprecated:
-	getPaymentHistory();
-	getMonthlySums();
 }
 </script>
 <style>
@@ -438,26 +363,11 @@ hr {
 				</tr>
 				<tr>
 					<th>Average</th>
-					<th>$<div id="averagehousehistory"></div></th>
+					<th><div id="averagehousehistory"></div></th>
 				</tr>
 			</table>
 		</div>
 	</div>
-
-	<div name="divPaymentSummary">
-		<ul id="ulPaymentSummary">
-		</ul>
-	</div>
-	<h4>payment history</h4>
-    <div name="divPaymentHistory">
-      <ul id="ulPaymentHistory">
-      </ul>
-    </div>
-	<h4>monthly sums</h4>
-    <div name="divMonthlySummary">
-      <ul id="ulMonthlySummary">
-      </ul>
-    </div>
 </div>
 </body>
 </html>
