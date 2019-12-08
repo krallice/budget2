@@ -277,10 +277,13 @@ function getRecentHouseHistory() {
 
 			// Clear our table:
 			var rows = tableHouseHistory.rows;
-			var i = rows.length;
-			while (--i) {
+			for (var i = rows.length - 1; i > 1; i--) {
 				tableHouseHistory.deleteRow(i);
 			}
+
+			// Used for calculating our average:
+			var average = 0.0;
+			var n = 0;
 
 			// Foreach element returned in the JSON,
 			// dynamically create our option object:
@@ -295,7 +298,14 @@ function getRecentHouseHistory() {
 				var newCell2 = newRow.insertCell(1);
 				var newCell2Text = document.createTextNode("$" + numberWithCommas(obj["amount"]));
 				newCell2.appendChild(newCell2Text);
+
+				++n;
+				average += obj["amount"];
+
 			});
+
+			average = average / n;
+			document.getElementById("averagehousehistory").innerHTML = Math.ceil(average);
 		}
 	};
 	// Fire off the request:
@@ -418,13 +428,17 @@ hr {
 		</div>
 	</div>
 
-	<h3>house summary</h3>
+	<h3>house history</h3>
 	<div class="row">
 		<div class="col-md-4">
 			<table id="tablehousehistory" class="table">
 				<tr>
 					<th>Month</th>
 					<th>Saving</th>
+				</tr>
+				<tr>
+					<th>Average</th>
+					<th>$<div id="averagehousehistory"></div></th>
 				</tr>
 			</table>
 		</div>
