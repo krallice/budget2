@@ -176,7 +176,7 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 		b.TotalLocked = b.TotalLocked + v
 	}
 
-	// Locked this month:
+	/* Old locked this month query:
 	sql = `
 	SELECT amount FROM 
 		(SELECT 
@@ -204,6 +204,24 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 	// Subtract one from the value as months start on day 1, not day 0:
 	paydayoffset := config.Budget2Config.Payday - 1
 	sql = fmt.Sprintf(sql, config.Budget2Config.Payday, paydayoffset, paydayoffset, config.Budget2Config.Payday, paydayoffset, paydayoffset)
+	*/
+
+	// New locked this month query:
+	sql = `
+	SELECT amount FROM 
+		( SELECT 
+			payment_type_id,
+			date_trunc('month', payment_date - interval '%d day') + interval '%d day' as payment_date,
+			SUM(amount) as amount
+		FROM payments
+		WHERE payment_type_id = 1
+		GROUP by 1, 2
+		) AS agg_values
+	WHERE
+		payment_date = date_trunc('month', CURRENT_DATE - interval '%d day') + interval '%d day';
+	`
+	paydayoffset := config.Budget2Config.Payday - 1
+	sql = fmt.Sprintf(sql, paydayoffset, paydayoffset, paydayoffset, paydayoffset)
 	row = db.QueryRow(sql)
 	err = row.Scan(&b.LockedThisMonth)
 	if err != nil {
