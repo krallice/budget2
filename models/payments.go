@@ -101,24 +101,39 @@ func InsertPayment(p *Payment) error {
 // Aggregate the payment amounts based upon our pay boundary:
 func GetMonthlySummary() ([]*MonthlySummary, error) {
 
-	sql := `
-	SELECT 
-    	payment_type_id,
-    	CASE 
-        WHEN date_part('day', payment_date) < %d THEN 
-             date_trunc('month', payment_date) + interval '-1month %d days'
-        ELSE date_trunc('month', payment_date) + interval '%d days'
-    	END AS payment_date,
-    	SUM(amount) AS amount
-	FROM
-    	payments	
-	GROUP BY 1,2
-	ORDER BY payment_date DESC;
+	sql :=
 	`
+	SELECT 
+		payment_type_id,
+		date_trunc('month', payment_date - interval '%d day') + interval '%d day' as payment_date,
+		SUM(amount)
+	FROM payments
+	GROUP by 1, 2
+	ORDER by 2 DESC;
+	`
+
+	// Old Ineffient Query:
+	// sql := `
+	// SELECT 
+		// payment_type_id,
+		// CASE 
+        // WHEN date_part('day', payment_date) < %d THEN 
+             // date_trunc('month', payment_date) + interval '-1month %d days'
+        // ELSE date_trunc('month', payment_date) + interval '%d days'
+		// END AS payment_date,
+		// SUM(amount) AS amount
+	// FROM
+		// payments	
+	// GROUP BY 1,2
+	// ORDER BY payment_date DESC;
+	// `
+	// paydayoffset := config.Budget2Config.Payday - 1
+	// sql = fmt.Sprintf(sql, config.Budget2Config.Payday, paydayoffset, paydayoffset)
+
 	// Substitute the %d values in sql with the Payday values from our master config structure
 	// Subtract one from the value as months start on day 1, not day 0:
 	paydayoffset := config.Budget2Config.Payday - 1
-	sql = fmt.Sprintf(sql, config.Budget2Config.Payday, paydayoffset, paydayoffset)
+	sql = fmt.Sprintf(sql, paydayoffset, paydayoffset)
 
 	rows, err := db.Query(sql)
 	if err != nil {
