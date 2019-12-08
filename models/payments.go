@@ -7,7 +7,8 @@ import (
 	"strconv"
 )
 
-// An individual payment:
+// An individual payment record, maps directly to the payment 
+// schema in DB
 type Payment struct {
 	Id              int       `json:"id"`
 	PaymentTypeId	int       `json:"payment_type_id"`
@@ -21,6 +22,7 @@ type PaymentSummary struct {
 	Amount          float32 `json:"amount"`
 }
 
+// Total amount paid per date, per payment_type_id:
 type MonthlySummary struct {
 	PaymentTypeId	int     `json:"payment_type_id"`
 	PaymentDate		time.Time `json:"payment_date"`
