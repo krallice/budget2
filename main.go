@@ -45,6 +45,9 @@ func main() {
 
 	http.HandleFunc("/api/v1/payments", ajaxPayments)
 
+	// Future Resource Serving:
+	// http.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("./res"))))
+
 	log.Print("Webserver UP")
 	http.ListenAndServe(":3000", nil)
 }
