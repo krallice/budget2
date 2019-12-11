@@ -31,3 +31,18 @@ func AllPaymentTypes() ([]*PaymentType, error) {
 	}
 	return pts, nil
 }
+
+// Returns only the specific PaymentType based on id:
+func GetPaymentTypeById(i int) (*PaymentType, error) {
+
+	var p PaymentType
+	sql := `
+	SELECT * FROM payment_types WHERE id = $1
+	`
+	err := db.QueryRow(sql, i).Scan(&p.Id, &p.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &p, nil
+}
