@@ -1,6 +1,18 @@
+# Date of new pay cycle:
 payday: 15
+# Date rent is due:
 rentday: 10
+# Amount owed in rent each month:
 rentamount: 3000
+
+# Initial starting values (base number that monthly 
+# contributions add on to:
 initial-values:
     # Initial House value:
     1: 10000
+
+# Secret Values:
+# Add these keys into config-secret.yaml
+# email-recipients:
+#       - "user1@email1.com"
+#       - "user2@email2.com"
