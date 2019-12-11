@@ -53,7 +53,7 @@ func (p *Payment) addPaymentDate() {
 }
 
 // Return all Payments from DB:
-func AllPayments() ([]*Payment, error) {
+func (db *DB) AllPayments() ([]*Payment, error) {
 
 	sql := `
 	SELECT * FROM payments
@@ -81,7 +81,7 @@ func AllPayments() ([]*Payment, error) {
 
 // Insert pointer to payment into the DB
 // It's also this function's responsibility to add the date:
-func InsertPayment(p *Payment) error {
+func (db *DB) InsertPayment(p *Payment) error {
 
 	// Generate our payment date based upon server time:
 	p.addPaymentDate()
@@ -101,7 +101,7 @@ func InsertPayment(p *Payment) error {
 }
 
 // Aggregate the payment amounts based upon our pay boundary:
-func GetMonthlySummary() ([]*MonthlySummary, error) {
+func (db *DB) GetMonthlySummary() ([]*MonthlySummary, error) {
 
 	// Old Ineffient Query:
 	// sql := `
@@ -159,7 +159,7 @@ func GetMonthlySummary() ([]*MonthlySummary, error) {
 	return summaries, nil
 }
 
-func GetBudgetSummary() (*BudgetSummary, error) {
+func (db *DB) GetBudgetSummary() (*BudgetSummary, error) {
 
 	var b BudgetSummary
 
@@ -245,7 +245,7 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 	}
 
 	// Get individual payment type summaries:
-	summaries, err := GetPaymentSummary()
+	summaries, err := db.GetPaymentSummary()
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func GetBudgetSummary() (*BudgetSummary, error) {
 }
 
 // Aggregate the total payment amount for each payment_type:
-func GetPaymentSummary() ([]*PaymentSummary, error) {
+func (db *DB) GetPaymentSummary() ([]*PaymentSummary, error) {
 
 	sql := `
 	SELECT payment_type_id, SUM(amount) as amount FROM payments GROUP BY payment_type_id ORDER BY payment_type_id ASC
@@ -287,7 +287,7 @@ func GetPaymentSummary() ([]*PaymentSummary, error) {
 }
 
 // Get our last 6 month recent house history figures:
-func GetRecentHouseHistory() ([]*MonthlySummary, error) {
+func (db *DB) GetRecentHouseHistory() ([]*MonthlySummary, error) {
 
 	sql := `
 	SELECT

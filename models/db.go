@@ -6,16 +6,33 @@ import (
 	"log"
 )
 
-var db *sql.DB
+type DB struct {
+	*sql.DB
+}
 
-func InitDB(dataSourceName string) {
-	var err error
-	db, err = sql.Open("postgres", dataSourceName)
+type Datastore interface {
+	AllPayments() ([]*Payment, error)
+
+	AllPaymentTypes() ([]*PaymentType, error)
+	GetPaymentTypeById(i int) (*PaymentType, error)
+
+	InsertPayment(p *Payment) error
+	GetMonthlySummary() ([]*MonthlySummary, error)
+	GetBudgetSummary() (*BudgetSummary, error)
+	GetPaymentSummary() ([]*PaymentSummary, error)
+	GetRecentHouseHistory() ([]*MonthlySummary, error)
+}
+
+func InitDB(dataSourceName string) (*DB, error) {
+	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
 		log.Panic(err)
+		return  nil, err
 	}
 
 	if err = db.Ping(); err != nil {
 		log.Panic(err)
+		return  nil, err
 	}
+	return &DB{db}, nil
 }

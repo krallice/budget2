@@ -14,6 +14,10 @@ import (
 	"strings"
 )
 
+type Env struct {
+	db models.Datastore
+}
+
 func main() {
 
 	/* Disable write to syslog
@@ -36,17 +40,24 @@ func main() {
 	}
 
 	log.Print("Connecting to postgres DB")
-	models.InitDB("postgres://postgres:password1@localhost/budget2")
+	db, err := models.InitDB("postgres://postgres:password1@localhost/budget2")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Init our env variable:
+	env := &Env{db}
 
 	// Main Index:
-	http.HandleFunc("/", getIndex)
+	http.HandleFunc("/", env.getIndex)
 
 	// AJAX Functions:
-	http.HandleFunc("/api/v1/budgetsummary", ajaxBudgetSummary)
-	http.HandleFunc("/api/v1/paymenttypes", ajaxPaymentTypes)
-	http.HandleFunc("/api/v1/recenthousehistory", ajaxRecentHouseHistory)
+	http.HandleFunc("/api/v1/budgetsummary", env.ajaxBudgetSummary)
+	http.HandleFunc("/api/v1/paymenttypes", env.ajaxPaymentTypes)
+	http.HandleFunc("/api/v1/recenthousehistory", env.ajaxRecentHouseHistory)
 
-	http.HandleFunc("/api/v1/payments", ajaxPayments)
+	http.HandleFunc("/api/v1/payments", env.ajaxPayments)
 
 	// Future Resource Serving:
 	// http.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("./res"))))
@@ -56,7 +67,7 @@ func main() {
 }
 
 // Basic Placeholder Index Page:
-func getIndex(w http.ResponseWriter, r *http.Request) {
+func (env *Env) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
@@ -67,13 +78,13 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 // Returns our master BudgetSummary Struct as JSON:
-func ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
+func (env *Env) ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	sum, err := models.GetBudgetSummary()
+	sum, err := env.db.GetBudgetSummary()
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		return
@@ -88,13 +99,13 @@ func ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
 }
 
 // Returns all PaymentTypes in DB as a JSON object:
-func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
+func (env *Env) ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	pts, err := models.AllPaymentTypes()
+	pts, err := env.db.AllPaymentTypes()
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		return
@@ -109,12 +120,12 @@ func ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 }
 
 // Either Get or Set our Payment(s):
-func ajaxPayments(w http.ResponseWriter, r *http.Request) {
+func (env *Env) ajaxPayments(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	// Return all Payments:
 	case "GET":
-		pys, err := models.AllPayments()
+		pys, err := env.db.AllPayments()
 		if err != nil {
 			http.Error(w, http.StatusText(500), 500)
 			return
@@ -143,12 +154,12 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = models.InsertPayment(&p)
+		err = env.db.InsertPayment(&p)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		// We successfully made a payment, time to email:
-		generateEmail(&p)
+		env.generateEmail(&p)
 		return
 
 	default:
@@ -158,13 +169,13 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 }
 
 // Returns a summary of recent house payments:
-func ajaxRecentHouseHistory(w http.ResponseWriter, r *http.Request) {
+func (env *Env) ajaxRecentHouseHistory(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
 		http.Error(w, http.StatusText(405), 405)
 		return
 	}
-	sums, err := models.GetRecentHouseHistory()
+	sums, err := env.db.GetRecentHouseHistory()
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, http.StatusText(500), 500)
@@ -180,20 +191,20 @@ func ajaxRecentHouseHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 // Generate email notifying of payment:
-func generateEmail(p *models.Payment) {
+func (env *Env) generateEmail(p *models.Payment) {
 
 	auth := smtp.PlainAuth("", config.Budget2Config.SenderAddress, "", "127.0.0.1")
 	toHeader := strings.Join(config.Budget2Config.EmailRecipients, ",")
 
 	// Get our Payment Type:
-	pt, err := models.GetPaymentTypeById(p.PaymentTypeId)
+	pt, err := env.db.GetPaymentTypeById(p.PaymentTypeId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	// Get our complete summary for some quick stats:
-	sum, err := models.GetBudgetSummary()
+	sum, err := env.db.GetBudgetSummary()
 	if err != nil {
 		fmt.Println(err)
 		return

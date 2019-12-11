@@ -6,7 +6,7 @@ type PaymentType struct {
 }
 
 // Returns a slice of all PaymentTypes in DB:
-func AllPaymentTypes() ([]*PaymentType, error) {
+func (db *DB) AllPaymentTypes() ([]*PaymentType, error) {
 
 	sql := `
 	SELECT * FROM payment_types
@@ -33,7 +33,7 @@ func AllPaymentTypes() ([]*PaymentType, error) {
 }
 
 // Returns only the specific PaymentType based on id:
-func GetPaymentTypeById(i int) (*PaymentType, error) {
+func (db *DB) GetPaymentTypeById(i int) (*PaymentType, error) {
 
 	var p PaymentType
 	sql := `
