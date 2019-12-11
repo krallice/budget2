@@ -189,6 +189,12 @@ function submitPayment() {
 		if (this.readyState == 4 && this.status == 200) {
 			// Refresh current display:
 			loadBodyAjax();
+		} else if (this.readyState == 4 && this.status == 405) {
+			alert("Withdrawing from our savings is not allowed. Save harder!");
+			loadBodyAjax();
+		} else if (this.readyState == 4) {
+			alert("Whoops something went wrong.");
+			loadBodyAjax();
 		}
 	};
 

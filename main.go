@@ -136,6 +136,13 @@ func ajaxPayments(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		// Do not allow withdrawals via the front end:
+		if p.Amount < 1 {
+			http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+			return
+		}
+
 		err = models.InsertPayment(&p)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
