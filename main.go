@@ -14,6 +14,7 @@ import (
 	"strings"
 )
 
+// Master environment:
 type Env struct {
 	db models.Datastore
 }
@@ -70,7 +71,7 @@ func main() {
 func (env *Env) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 	tmpl := template.Must(template.ParseFiles("./templates/index.html"))
@@ -81,12 +82,12 @@ func (env *Env) getIndex(w http.ResponseWriter, r *http.Request) {
 func (env *Env) ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 	sum, err := env.db.GetBudgetSummary()
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	jreply, err := json.Marshal(sum)
@@ -102,12 +103,12 @@ func (env *Env) ajaxBudgetSummary(w http.ResponseWriter, r *http.Request) {
 func (env *Env) ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 	pts, err := env.db.AllPaymentTypes()
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	jreply, err := json.Marshal(pts)
@@ -144,13 +145,13 @@ func (env *Env) ajaxPayments(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
 			fmt.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		// Do not allow withdrawals via the front end:
 		if p.Amount < 1 {
-			http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 
@@ -163,7 +164,7 @@ func (env *Env) ajaxPayments(w http.ResponseWriter, r *http.Request) {
 		return
 
 	default:
-		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 }
@@ -172,13 +173,13 @@ func (env *Env) ajaxPayments(w http.ResponseWriter, r *http.Request) {
 func (env *Env) ajaxRecentHouseHistory(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 	sums, err := env.db.GetRecentHouseHistory()
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, http.StatusText(500), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	jreply, err := json.Marshal(sums)
