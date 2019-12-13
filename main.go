@@ -41,7 +41,9 @@ func main() {
 	}
 
 	log.Print("Connecting to postgres DB")
-	db, err := models.InitDB("postgres://postgres:password1@localhost/budget2")
+	connection := fmt.Sprintf("postgres://%s:%s@%s/%s", config.Budget2Config.DBUsername, config.Budget2Config.DBPassword,
+		config.Budget2Config.DBServer, config.Budget2Config.DBName)
+	db, err := models.InitDB(connection)
 	if err != nil {
 		fmt.Println(err)
 		return

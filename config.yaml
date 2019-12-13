@@ -16,3 +16,7 @@ initial-values:
 # email-recipients:
 #       - "user1@email1.com"
 #       - "user2@email2.com"
+# db-username: "postgres"
+# db-password: "password123"
+# db-server: "localhost"
+# db-name: "budget2"

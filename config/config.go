@@ -12,6 +12,10 @@ type Budget2ConfigStruct struct {
 	InitialValues map[int]float32 `yaml:"initial-values"`
 	SenderAddress string
 	EmailRecipients []string `yaml:"email-recipients"`
+	DBUsername string `yaml:"db-username"`
+	DBPassword string `yaml:"db-password"`
+	DBServer string `yaml:"db-server"`
+	DBName string `yaml:"db-name"`
 }
 
 var Budget2Config Budget2ConfigStruct
