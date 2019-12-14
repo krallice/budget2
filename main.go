@@ -40,6 +40,7 @@ func main() {
 		return
 	}
 
+	// Connect to DB:
 	log.Print("Connecting to postgres DB")
 	connection := fmt.Sprintf("postgres://%s:%s@%s/%s", config.Budget2Config.DBUsername, config.Budget2Config.DBPassword,
 		config.Budget2Config.DBServer, config.Budget2Config.DBName)

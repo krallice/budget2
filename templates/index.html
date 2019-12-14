@@ -198,6 +198,7 @@ function submitPayment() {
 			alert("Whoops something went wrong.");
 			loadBodyAjax();
 		}
+		document.getElementById("inputPayment").value = "";
 	};
 
 	// Fire off the request:
