@@ -85,6 +85,8 @@ function getBudgetSummary() {
 			document.getElementById("lockedthismonth").innerHTML = "$" + numberWithCommas(data["lockedthismonth"]);
 			if ( ! data["lockedthismonth"] > 0 ) {
 				document.getElementById("trlockedthismonth").classList.add("table-danger");
+			} else {
+				document.getElementById("trlockedthismonth").classList.remove("table-danger");
 			}
 			if ( ! data["rentpaid"] ) { 
 				document.getElementById("rentadvice").innerHTML = "(Assumes rent has NOT been paid)";
