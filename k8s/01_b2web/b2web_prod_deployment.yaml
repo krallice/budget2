@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: b2web
+  namespace: budget2
+  labels: 
+    app: b2web
+    ver: prod
+spec:
+  replicas: 4
+  selector:
+    matchLabels:  #Deploy in a POD that has labels app: color and color: blue
+      app: b2web
+      ver: prod
+  template: #For the creation of the pod      
+    metadata:
+      labels:
+        app: b2web
+        ver: prod
+    spec:
+      containers:
+        - name: b2web
+          image: docker-registry:5000/budget2-web:latest
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: b2web-prod-cm01

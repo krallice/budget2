@@ -1,3 +1,7 @@
+CREATE DATABASE budget2;
+
+\c budget2;
+
 CREATE TABLE payment_types (
 	id SERIAL PRIMARY KEY,
 	name VARCHAR(255) NOT NULL

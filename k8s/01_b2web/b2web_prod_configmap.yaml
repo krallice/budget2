@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: b2web-prod-cm01
+  namespace: budget2
+data:
+  B2_PAYDAY: "15"
+  B2_RENTDAY: "10"
+  B2_RENTAMOUNT: "3000"
+  B2_INITIALVALUES: "1:10000"
+  B2_SENDERADDRESS: fake@fake.domain
+  B2_EMAILRECIPIENTS: r1@fake.domain r2@fake.domain
+  B2_DBUSERNAME: postgres
+  B2_DBPASSWORD: password123
+    # B2_DBSERVER: db01.hb.noclab.com.au
+  B2_DBSERVER: "192.168.1.210"
+  B2_DBNAME: budget2
