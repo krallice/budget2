@@ -24,6 +24,12 @@ spec:
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 3000
+          env:
+            - name: B2_DBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-password
+                  key: password
           envFrom:
             - configMapRef:
                 name: b2web-prod-cm01
