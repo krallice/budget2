@@ -33,7 +33,7 @@ func main() {
 	log.Print("Budget2 Daemon Starting ...")
 
 	// Attempt to read our YAML config file, and bomb out if this fails:
-	log.Print("Reading YAML config file")
+	log.Print("Reading Configuration")
 	err := config.ReadConfig()
 	if err != nil {
 		fmt.Println(err)
