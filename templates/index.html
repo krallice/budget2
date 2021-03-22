@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-				 
+
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
 	<title>Budget2</title>
 
 <script>
@@ -89,9 +92,9 @@ function getBudgetSummary() {
 				document.getElementById("trlockedthismonth").classList.remove("table-danger");
 			}
 			if ( ! data["rentpaid"] ) { 
-				document.getElementById("rentadvice").innerHTML = "(Assumes rent has NOT been paid)";
+				document.getElementById("rentadvice").innerHTML = "Rent has not yet been paid (~$3k)";
 			} else {
-				document.getElementById("rentadvice").innerHTML = "(Assumes rent HAS been paid)";
+				document.getElementById("rentadvice").innerHTML = "Rent has been paid!";
 			}
 
 			// Savings Breakdown:
@@ -270,120 +273,90 @@ function loadBodyAjax() {
 	getRecentHouseHistory();
 }
 </script>
-<style>
-body {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  /* color: white; */
-}
-
-/* table, tr, td {
-	color: white
-} */
-
-h3 {
-  margin-top: 2rem;
-}
-
-.row {
-  margin-bottom: 1rem;
-}
-.row .row {
-  margin-top: 1rem;
-  margin-bottom: 0;
-}
-[class*="col-"] {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  /* background-color: rgba(86, 61, 124, .15);
-  border: 1px solid rgba(86, 61, 124, .2); */
-}
-
-hr {
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
-</style>
 </head>
 <!--<body background="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Miles_Davis_Strasbourg_face_2.jpg/170px-Miles_Davis_Strasbourg_face_2.jpg" onload="loadBodyAjax()">-->
 <body onload="loadBodyAjax()">
+
 <div class="container">
 
-	<h1>budget2</h1>
-	<p class="lead">our budget tracking site</p>
+	<div class="starter-template">
 
-	<div class="row">
-		<div class="col-md-4">
-			<h3>savings summary</h3>
-			<p>if you're in a hurry, glance here:</p>
-			<table class="table">
-				<tr>
-					<td>Bank Limit<br />
-						<i>(Don't go lower than ...)</i><br />
-						<i><div id="rentadvice"></div></i>
-					</td>
-					<td><b><div id="limit"></div></b></td>
-				</tr>
-				<tr id="trlockedthismonth" class="">
-					<td>Saved this month<br /></td>
-					<td><div id="lockedthismonth"></div></td>
-				</tr>
-			</table>
-		</div>
-
-		<div class="col-md-4">
-			<h3>savings breakdown</h3>
-			<p>ok, time for some detail:</p>
-			<table id="tablesavingsbreakdown" class="table">
-				<tr>
-					<td>Total Locked:</td>
-					<td><b><div id="totallocked"></div></b></td>
-				</tr>
-			</table>
-		</div>
-	</div>
-
-	<h3>contribute</h3>
-	<div class="row">
-		<div class="col-md-4">
-			<div class="input-group mb-3">
-			  <div class="input-group-prepend">
-				<label class="input-group-text" for="inputGroupSelect01">Bucket</label>
-			  </div>
-			  <select class="custom-select" id="selectPaymentTypes">
-				<option selected value="0">Choose...</option>
-				<!-- <option value="1">House</option>
-				<option value="2">Holiday</option>
-				<option value="3">Sinking</option> -->
-			  </select>
-			</div>
-			<div class="input-group mb-3">
-				<div class="input-group-prepend">
-					<span class="input-group-text" id="basic-addon1">$</span>
-				</div>
-				<input id="inputPayment" type="number" class="form-control" placeholder="100" aria-label="100" aria-describedby="basic-addon1">
-				<div class="input-group-append">
-					<!--<button class="btn btn-outline-secondary" type="button">Button</button>-->
-					<button id="btnpay" class="btn btn-success" type="button" onclick="submitPayment()">Pay</button>
-				</div>
+		<div class="row">
+			<div class="col-md-4 col-md-offset-6">
+				<h1>budget2</h1>
+				<p class="lead">our budget tracking site</p>
 			</div>
 		</div>
-	</div>
 
-	<h3>house history</h3>
-	<div class="row">
-		<div class="col-md-4">
-			<table id="tablehousehistory" class="table">
-				<tr>
-					<th>Month</th>
-					<th>Saving</th>
-				</tr>
-				<tr>
-					<th>Average</th>
-					<th><div id="averagehousehistory"></div></th>
-				</tr>
-			</table>
+		<hr>
+
+		<div class="row">
+			<div class="col-md-4">
+
+				Don't go below: <b><div id="limit"></div></b><br />
+				<div id="rentadvice"></div>
+				<br />
+
+				<table id="tablesavingsbreakdown" class="table">
+					<tr>
+						<td>Total Locked:</td>
+						<td><b><div id="totallocked"></div></b></td>
+					</tr>
+				</table>
+
+				<table class="table">
+					<tr id="trlockedthismonth" class="">
+						<td>Saved this month<br /></td>
+						<td><div id="lockedthismonth"></div></td>
+					</tr>
+				</table>
+
+			</div>
 		</div>
+
+		<hr>
+
+		<div class="row">
+			<div class="col-md-4">
+				<h3>contribute</h3>
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<label class="input-group-text" for="inputGroupSelect01">Bucket</label>
+					</div>
+					<select class="custom-select" id="selectPaymentTypes">
+						<option selected value="0">Choose...</option>
+					</select>
+				</div>
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<span class="input-group-text" id="basic-addon1">$</span>
+					</div>
+					<input id="inputPayment" type="number" class="form-control" placeholder="100" aria-label="100" aria-describedby="basic-addon1">
+					<div class="input-group-append">
+						<button id="btnpay" class="btn btn-success" type="button" onclick="submitPayment()">Pay</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<hr>
+
+		<div class="row">
+			<div class="col-md-4">
+				<h3>house history</h3>
+				<table id="tablehousehistory" class="table">
+					<tr>
+						<th>Month</th>
+						<th>Saving</th>
+					</tr>
+					<tr>
+						<th>Average</th>
+						<th><div id="averagehousehistory"></div></th>
+					</tr>
+				</table>
+			</div>
+		</div>
+
 	</div>
 </div>
 </body>
