@@ -7,7 +7,7 @@ metadata:
     app: b2web
     ver: dev
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:  #Deploy in a POD that has labels app: color and color: blue
       app: b2web
@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: b2web
-          image: docker-registry:5000/budget2-web:latest
-          imagePullPolicy: "IfNotPresent"
+          image: trow.kube-public:31000/budget2-web-dev:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
           env:
@@ -33,3 +33,5 @@ spec:
           envFrom:
             - configMapRef:
                 name: b2web-dev-cm01
+      imagePullSecrets:
+        - name: regcred
