@@ -21,6 +21,8 @@ type Datastore interface {
 	GetBudgetSummary() (*BudgetSummary, error)
 	GetPaymentSummary() ([]*PaymentSummary, error)
 	GetRecentHouseHistory() ([]*MonthlySummary, error)
+
+	GetPaymentGoals() ([]*PaymentGoal, error)
 }
 
 func InitDB(dataSourceName string) (*DB, error) {

@@ -63,6 +63,48 @@ function getPaymentTypes() {
 	reqPaymentTypes.send();
 }
 
+function getPaymentGoals() {
+
+	var reqPaymentGoals = new XMLHttpRequest();
+	reqPaymentGoals.open("GET", "/api/v1/paymentgoals");
+
+	reqPaymentGoals.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var data = JSON.parse(this.responseText);
+
+			data.forEach( function(obj) {
+				if (obj.aggregate == true) {
+
+					// Calculate months difference:
+					var months;
+					d = new Date(obj.goal_date);
+					var today = new Date();
+					months = (d.getFullYear() - today.getFullYear()) * 12;
+					months -= today.getMonth();
+					months += d.getMonth();
+					months = months <= 0 ? 0 : months;
+
+					document.getElementById("aggregate_date").innerHTML = d.getDate() + "-" + (d.getMonth()+1) + "-" + d.getFullYear();
+					document.getElementById("aggregate_amount").innerHTML = "$" + numberWithCommas(obj.amount) + " over " + months + "mo";
+
+					var totallocked = document.getElementById("totallocked").innerHTML;
+					totallocked = totallocked.replace(/\$/g, '');
+					totallocked = totallocked.replace(/,/g, '');
+					var amountRemaining = obj.amount - totallocked;
+					var amountRemainingMonthly = Math.round(amountRemaining / months);
+
+					document.getElementById("aggregate_remaining").innerHTML = "$" + numberWithCommas(amountRemaining) + " ($" + numberWithCommas(amountRemainingMonthly) + "/mo)";
+				}
+			});
+		} else if (this.status != 200) {
+			var elem = document.getElementById("divgoals")
+			elem.parentNode.removeChild(elem);
+		}
+	};
+
+	reqPaymentGoals.send();
+}
+
 // Function that gets our budget summary, populates the page with data
 // and applies conditional formatting if required.
 function getBudgetSummary() {
@@ -268,6 +310,8 @@ function loadBodyAjax() {
 
 	// Get our most recent monthly totals for the House fund:
 	getRecentHouseHistory();
+
+	getPaymentGoals();
 }
 </script>
 <style>
@@ -343,9 +387,9 @@ hr {
 		</div>
 	</div>
 
-	<h3>contribute</h3>
 	<div class="row">
 		<div class="col-md-4">
+			<h3>contribute</h3>
 			<div class="input-group mb-3">
 			  <div class="input-group-prepend">
 				<label class="input-group-text" for="inputGroupSelect01">Bucket</label>
@@ -367,6 +411,25 @@ hr {
 					<button id="btnpay" class="btn btn-success" type="button" onclick="submitPayment()">Pay</button>
 				</div>
 			</div>
+		</div>
+
+		<div class="col-md-4" id="divgoals">
+			<h3>goal breakdown</h3>
+			<!-- <p>ok, time for some detail:</p> -->
+			<table id="tablepaymentgoals" class="table">
+				<tr>
+					<td>Goal Amount:</td>
+					<td><b><div id="aggregate_amount"></div></b></td>
+				</tr>
+				<tr>
+					<td>Goal Remaining:</td>
+					<td><b><div id="aggregate_remaining"></div></b></td>
+				</tr>
+				<tr>
+					<td>Goal Date:</td>
+					<td><b><div id="aggregate_date"></div></b></td>
+				</tr>
+			</table>
 		</div>
 	</div>
 

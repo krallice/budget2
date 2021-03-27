@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: b2web
-          image: trow.kube-public:31000/budget2-web-dev:latest
+          image: k1.hb.noclab.com.au:31320/b2web:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

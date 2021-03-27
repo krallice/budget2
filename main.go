@@ -63,6 +63,8 @@ func main() {
 
 	http.HandleFunc("/api/v1/payments", env.ajaxPayments)
 
+	http.HandleFunc("/api/v1/paymentgoals", env.ajaxPaymentGoals)
+
 	// Future Resource Serving:
 	// http.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("./res"))))
 
@@ -110,6 +112,27 @@ func (env *Env) ajaxPaymentTypes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pts, err := env.db.AllPaymentTypes()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	jreply, err := json.Marshal(pts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jreply)
+}
+
+// Returns all PaymentGoals in DB as a JSON object:
+func (env *Env) ajaxPaymentGoals(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+	pts, err := env.db.GetPaymentGoals()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

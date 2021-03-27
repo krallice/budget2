@@ -13,3 +13,11 @@ CREATE TABLE payments (
 	payment_date DATE NOT NULL,
 	amount NUMERIC(12,2) NOT NULL
 );
+
+CREATE TABLE payment_goals (
+	id SERIAL PRIMARY KEY,
+	aggregate BOOLEAN,
+	payment_type_id INTEGER REFERENCES payment_types(id),
+	goal_date DATE NOT NULL,
+	amount NUMERIC(12,2) NOT NULL
+);
